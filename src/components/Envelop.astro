@@ -1,0 +1,415 @@
+---
+/**
+ * Interactive wax-sealed wedding envelope.
+ *
+ * Markup + visuals live here; motion lives in src/scripts/envelopeAnimation.ts
+ * (hydrated below with client:load — required for scripts to run in Astro).
+ */
+---
+
+<div class="scene" data-envelope-scene>
+  <!-- Ambient golden halo behind the envelope -->
+  <div class="halo gold-halo" data-halo aria-hidden="true"></div>
+
+  <!-- Floating gold / warm-blue dust -->
+  <canvas class="scene__particles" data-particles aria-hidden="true"></canvas>
+
+  <div class="envelope-wrap" data-envelope-wrap>
+    <div class="envelope" data-envelope>
+      <!-- Soft glow hugging the envelope -->
+      <div class="envelope__glow" data-glow aria-hidden="true"></div>
+
+      <!-- Back panel -->
+      <div class="envelope__back" data-back aria-hidden="true"></div>
+
+      <!-- Inner invitation card -->
+      <article class="card" data-card>
+        <svg class="card__flourish" viewBox="0 0 120 24" fill="none" aria-hidden="true">
+          <path
+            d="M4 12 C 30 2, 44 2, 60 12 C 76 22, 90 22, 116 12"
+            stroke="currentColor"
+            stroke-width="1.4"
+            stroke-linecap="round"></path>
+          <path d="M60 4.5 l4.5 7.5 -4.5 7.5 -4.5 -7.5 Z" fill="currentColor"></path>
+        </svg>
+
+        <p class="card__eyebrow">Nuestra boda</p>
+
+        <h2 class="card__names">Stiven <span>&amp;</span> Milena</h2>
+
+        <div class="card__divider" aria-hidden="true">
+          <span></span><i></i><span></span>
+        </div>
+
+        <p class="card__date">S&aacute;bado &middot; 12 de Junio &middot; 2027</p>
+      </article>
+
+      <!-- Front pocket (covers the lower part of the card) -->
+      <div class="envelope__pocket" data-pocket aria-hidden="true">
+        <svg class="envelope__seams" viewBox="0 0 100 70" preserveAspectRatio="none">
+          <path d="M0 0 L50 26.5 L100 0" vector-effect="non-scaling-stroke"></path>
+        </svg>
+      </div>
+
+      <!-- Top flap (swings open around its top edge) -->
+      <div class="envelope__flap" data-flap aria-hidden="true">
+        <svg class="envelope__seams" viewBox="0 0 100 58" preserveAspectRatio="none">
+          <path d="M0 0 L50 58 L100 0" vector-effect="non-scaling-stroke"></path>
+        </svg>
+      </div>
+
+      <!-- Wax seal button (anchor handles centering so GSAP owns the button transform) -->
+      <div class="seal-anchor">
+        <button class="seal" data-seal type="button" aria-label="Abrir la invitaci&oacute;n">
+          <span class="seal__ring" aria-hidden="true"></span>
+          <span class="seal__mono">S<i>&middot;</i>M</span>
+        </button>
+      </div>
+    </div>
+
+    <p class="hint" data-hint>Toca el sello para abrir la invitaci&oacute;n</p>
+  </div>
+</div>
+
+<!-- Without JS the overlay would block the page forever -->
+<noscript><style>.scene { display: none; }</style></noscript>
+
+<style>
+  /* Scene ---------------------------------------------------------------- */
+  /* Fixed overlay: covers the viewport while closed and leaves NO gap in
+     the document flow once faded out (the page beneath becomes visible).
+     Opaque navy backdrop so the page underneath stays hidden until opened. */
+  .scene {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    padding: 1.5rem;
+    background: radial-gradient(95% 75% at 50% 38%, #0d2445 0%, var(--color-navy-deep) 70%);
+  }
+
+  /* Edge vignette for depth */
+  .scene::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(120% 90% at 50% 40%, transparent 55%, rgb(4 10 20 / 0.55));
+  }
+
+  .halo {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: min(140vw, 1000px);
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    animation: halo-breathe 7s ease-in-out infinite;
+  }
+
+  /* Dust floats above the backdrop but behind the envelope pieces */
+  .scene__particles {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .envelope-wrap {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Envelope --------------------------------------------------------------- */
+  .envelope {
+    position: relative;
+    width: min(88vw, 520px);
+    aspect-ratio: 10 / 7;
+    perspective: 1400px;
+    container-type: inline-size;
+  }
+
+  .envelope__glow {
+    position: absolute;
+    inset: -14%;
+    z-index: 0;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgb(201 162 39 / 0.18), transparent 72%);
+    filter: blur(24px);
+  }
+
+  .envelope__back {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: 14px;
+    background: linear-gradient(165deg, #122b52 0%, #081a33 78%);
+    box-shadow:
+      0 34px 70px -18px rgb(0 0 0 / 0.65),
+      inset 0 1px 0 rgb(250 246 238 / 0.07);
+  }
+
+  /* Gold hairlines along the folds */
+  .envelope__seams {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: rgb(230 201 106 / 0.35);
+    stroke-width: 1;
+  }
+
+  /* Front pocket: full face with a shallow V notch at the top */
+  .envelope__pocket {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    border-radius: 14px;
+    clip-path: polygon(0 0, 50% 38%, 100% 0, 100% 100%, 0 100%);
+    background: linear-gradient(180deg, #16345f 0%, #0c2344 52%, #081a33 100%);
+    box-shadow:
+      inset 0 2px 6px rgb(255 255 255 / 0.05),
+      inset 0 -20px 32px rgb(0 0 0 / 0.35);
+  }
+
+  /* Top flap: triangle folded down over the face */
+  .envelope__flap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 58%;
+    z-index: 30;
+    border-radius: 14px 14px 0 0;
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    transform-origin: top center;
+    background: linear-gradient(180deg, #0d2547 0%, #17355f 80%, #1b3c6b 100%);
+    box-shadow: 0 14px 24px -14px rgb(0 0 0 / 0.6);
+    backface-visibility: visible;
+  }
+
+  /* Wax seal ---------------------------------------------------------------- */
+  .seal-anchor {
+    position: absolute;
+    left: 50%;
+    top: 46%;
+    z-index: 40;
+    width: 24cqi;
+    max-width: 112px;
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+  }
+
+  .seal {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    border: none;
+    border-radius: 9999px;
+    cursor: pointer;
+    touch-action: manipulation;
+    background: radial-gradient(circle at 32% 28%, #efd68a 0%, #d4af37 45%, #a97e1c 100%);
+    box-shadow:
+      0 10px 22px -8px rgb(0 0 0 / 0.6),
+      inset 0 2px 4px rgb(255 255 255 / 0.5),
+      inset 0 -4px 8px rgb(90 60 0 / 0.45);
+    animation: seal-pulse 2.6s ease-in-out infinite;
+    transition: filter 0.15s ease;
+  }
+
+  .seal:hover {
+    filter: brightness(1.06);
+  }
+
+  .seal:focus-visible {
+    outline: 2px solid var(--color-gold-light);
+    outline-offset: 4px;
+  }
+
+  .seal__ring {
+    position: absolute;
+    inset: 9%;
+    border-radius: inherit;
+    border: 1px solid rgb(122 88 10 / 0.55);
+    box-shadow: inset 0 0 0 3px rgb(255 244 214 / 0.25);
+  }
+
+  .seal__mono {
+    font-family: var(--font-title);
+    font-weight: 700;
+    font-size: 5cqi;
+    color: #6b4d0d;
+    text-shadow: 0 1px 0 rgb(255 240 200 / 0.6);
+  }
+
+  .seal__mono i {
+    font-style: italic;
+    font-weight: 500;
+    font-size: 0.72em;
+    padding: 0 0.15em;
+    color: #7a5a10;
+  }
+
+  /* Hint ------------------------------------------------------------------- */
+  .hint {
+    margin-top: 1.5rem;
+    font-size: 0.72rem;
+    font-weight: 300;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    text-align: center;
+    color: rgb(250 246 238 / 0.55);
+  }
+
+  /* Invitation card ----------------------------------------------------------
+   Typography uses cqw so proportions hold while the card scales up. */
+  .card {
+    position: absolute;
+    left: 4%;
+    right: 4%;
+    top: 41%;
+    bottom: 2.5%;
+    z-index: 10;
+    container-type: inline-size;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2.2cqw;
+    padding: 4cqw 5cqw;
+    border-radius: 8px;
+    border: 1px solid rgb(201 162 39 / 0.35);
+    background:
+      linear-gradient(175deg, #fdfaf3 0%, #f3ecdc 100%);
+    box-shadow:
+      0 10px 24px -12px rgb(0 0 0 / 0.5),
+      inset 0 0 40px rgb(180 150 80 / 0.08);
+    color: var(--color-navy);
+  }
+
+  /* Inner gold frame (double-border stationery look) */
+  .card::before {
+    content: "";
+    position: absolute;
+    inset: 3.5cqw;
+    border: 1px solid rgb(201 162 39 / 0.5);
+    border-radius: 4px;
+    pointer-events: none;
+  }
+
+  .card__flourish {
+    width: 15cqw;
+    color: var(--color-gold);
+  }
+
+  .card__eyebrow {
+    font-size: 3cqw;
+    font-weight: 500;
+    letter-spacing: 0.38em;
+    text-indent: 0.38em; /* balance trailing letter-spacing */
+    text-transform: uppercase;
+    color: #a07c17;
+  }
+
+  .card__names {
+    font-family: var(--font-title);
+    font-size: 8.6cqw;
+    font-weight: 600;
+    line-height: 1.05;
+    text-align: center;
+  }
+
+  .card__names span {
+    font-style: italic;
+    font-weight: 500;
+    font-size: 0.8em;
+    padding: 0 0.5cqw;
+    color: var(--color-gold);
+  }
+
+  .card__divider {
+    display: flex;
+    align-items: center;
+    gap: 2cqw;
+  }
+
+  .card__divider span {
+    height: 1px;
+    width: 12cqw;
+    background: linear-gradient(90deg, transparent, var(--color-gold));
+  }
+
+  .card__divider span:last-child {
+    background: linear-gradient(90deg, var(--color-gold), transparent);
+  }
+
+  .card__divider i {
+    width: 1.6cqw;
+    height: 1.6cqw;
+    rotate: 45deg;
+    background: var(--color-gold);
+  }
+
+  .card__date {
+    font-size: 3.1cqw;
+    font-weight: 400;
+    letter-spacing: 0.22em;
+    text-indent: 0.22em;
+    text-transform: uppercase;
+    color: rgb(11 31 58 / 0.72);
+  }
+
+  /* Keyframes ---------------------------------------------------------------- */
+  @keyframes seal-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+      box-shadow:
+        0 10px 22px -8px rgb(0 0 0 / 0.6),
+        inset 0 2px 4px rgb(255 255 255 / 0.5),
+        inset 0 -4px 8px rgb(90 60 0 / 0.45);
+    }
+    50% {
+      transform: scale(1.045);
+      box-shadow:
+        0 14px 30px -8px rgb(0 0 0 / 0.7),
+        0 0 26px rgb(230 201 106 / 0.35),
+        inset 0 2px 4px rgb(255 255 255 / 0.5),
+        inset 0 -4px 8px rgb(90 60 0 / 0.45);
+    }
+  }
+
+  @keyframes halo-breathe {
+    0%,
+    100% {
+      opacity: 0.75;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .seal,
+    .halo {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  import { initEnvelope } from "../scripts/envelopeAnimation";
+  import { initParticles } from "../scripts/particles";
+  initEnvelope();
+  initParticles();
+</script>

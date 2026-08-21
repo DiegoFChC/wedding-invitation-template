@@ -1,0 +1,53 @@
+---
+/**
+ * Shared page composition: envelope intro + main sections + footer.
+ *
+ * Used by the generic landing (/) and by personalized token invitations
+ * (/invitacion/[token]), which pass guest data down to the RSVP section.
+ */
+import Layout from "../layouts/Layout.astro";
+import Envelop from "./Envelop.astro";
+import Hero from "./Hero.astro";
+import WeddingInfo from "./WeddingInfo.astro";
+import Schedule from "./Schedule.astro";
+import Rsvp from "./Rsvp.astro";
+import Footer from "./Footer.astro";
+
+interface Props {
+  guestName?: string;
+  allowedSlots?: number;
+  token?: string;
+}
+
+const { guestName, allowedSlots = 10, token = "" } = Astro.props;
+---
+
+<Layout>
+  <!-- Printed-style double frame around the viewport -->
+  <div
+    class="pointer-events-none fixed inset-3 z-[60] rounded-[10px] border border-gold/25 sm:inset-5"
+    aria-hidden="true"
+  >
+    <div class="absolute inset-[5px] rounded-[6px] border border-gold/15"></div>
+  </div>
+
+  <!-- Paper grain overlay -->
+  <div class="grain pointer-events-none fixed inset-0 z-[70]" aria-hidden="true"></div>
+
+  <!-- Introduction overlay (removed once opened) -->
+  <Envelop />
+
+  <main>
+    <Hero />
+    <WeddingInfo />
+    <Schedule />
+    <Rsvp guestName={guestName} maxSlots={allowedSlots} token={token} />
+  </main>
+
+  <Footer />
+</Layout>
+
+<script>
+  import { initScrollEffects } from "../scripts/scrollEffects";
+  initScrollEffects();
+</script>

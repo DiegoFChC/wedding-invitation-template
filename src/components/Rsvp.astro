@@ -1,0 +1,494 @@
+---
+/**
+ * Final section — RSVP form.
+ * Guests confirm attendance (attendee count + optional message).
+ *
+ * Personalized mode: when `guestName` is provided the name field is replaced
+ * by a greeting text and the stepper is capped at `maxSlots` (from the
+ * guest's allowedSlots in src/data/invitados.json).
+ */
+interface Props {
+  /** Guest name resolved from the invitation token (if any). */
+  guestName?: string;
+  /** Upper bound for the attendee stepper. */
+  maxSlots?: number;
+  /** Invitation token, forwarded with the submission payload. */
+  token?: string;
+}
+
+const { guestName, maxSlots = 10, token = "" } = Astro.props;
+const defaultAttendees = Math.min(2, maxSlots);
+---
+
+<section id="confirmar" class="rsvp" aria-label="Confirmación de asistencia">
+  <!-- Gold ornament marking the section boundary -->
+  <div class="rsvp__edge" aria-hidden="true"><span></span><i></i><span></span></div>
+
+  <div class="rsvp__glow" aria-hidden="true"></div>
+
+  <div class="rsvp__content">
+    <p class="rsvp__eyebrow" data-rsvp-animate>Confirma tu asistencia</p>
+
+    <h2 class="rsvp__title" data-rsvp-animate>&iquest;Nos acompa&ntilde;as?</h2>
+
+    <div class="rsvp__divider" data-rsvp-animate aria-hidden="true">
+      <span></span><i></i><span></span>
+    </div>
+
+    <div class="rsvp__panel" data-rsvp-animate>
+      <!-- Form -->
+      <form class="form" data-rsvp-form data-token={token} novalidate>
+        {guestName ? (
+          <div class="field">
+            <span class="field__label">Invitaci&oacute;n para</span>
+            <p class="guest-name" data-guest-name>{guestName}</p>
+            <input type="hidden" name="name" value={guestName} />
+          </div>
+        ) : (
+          <div class="field">
+            <label class="field__label" for="rsvp-name">Nombre y apellido</label>
+            <input
+              class="field__input"
+              id="rsvp-name"
+              name="name"
+              type="text"
+              autocomplete="name"
+              placeholder="Escribe tu nombre"
+              data-rsvp-name
+              required
+            />
+          </div>
+        )}
+
+        <div class="field">
+          <span class="field__label">&iquest;Contar&aacute;s con nosotros?</span>
+          <div class="segmented" role="group" aria-label="Asistencia" data-rsvp-attendance>
+            <button class="segmented__option" type="button" data-attendance="yes">
+              S&iacute;, all&iacute; estar&eacute;
+            </button>
+            <button class="segmented__option" type="button" data-attendance="no">
+              No podr&eacute; asistir
+            </button>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="field__label">N&uacute;mero de asistentes <em>(incluy&eacute;ndote)</em></span>
+          <div
+            class="stepper"
+            data-rsvp-stepper
+            data-min="1"
+            data-max={maxSlots}
+          >
+            <button class="stepper__btn" type="button" aria-label="Quitar asistente" data-rsvp-minus>&minus;</button>
+            <span class="stepper__value" data-rsvp-count aria-live="polite">{defaultAttendees}</span>
+            <button class="stepper__btn" type="button" aria-label="Agregar asistente" data-rsvp-plus>+</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="rsvp-message">Mensaje <em>(opcional)</em></label>
+          <textarea
+            class="field__input field__input--area"
+            id="rsvp-message"
+            name="message"
+            rows="3"
+            maxlength="300"
+            placeholder="Unas palabras para los novios..."
+            data-rsvp-message></textarea>
+        </div>
+
+        <p class="form__feedback" data-rsvp-feedback role="alert" hidden></p>
+
+        <button class="form__submit" type="submit" data-rsvp-submit>
+          Enviar confirmaci&oacute;n
+        </button>
+      </form>
+
+      <!-- Success state -->
+      <div class="success" data-rsvp-success hidden>
+        <svg class="success__flourish" viewBox="0 0 120 24" fill="none" aria-hidden="true">
+          <path
+            d="M4 12 C 30 2, 44 2, 60 12 C 76 22, 90 22, 116 12"
+            stroke="currentColor"
+            stroke-width="1.4"
+            stroke-linecap="round"></path>
+          <path d="M60 4.5 l4.5 7.5 -4.5 7.5 -4.5 -7.5 Z" fill="currentColor"></path>
+        </svg>
+        <h3 class="success__title">¡Gracias!</h3>
+        <p class="success__text" data-success-text></p>
+      </div>
+
+      <!-- Already answered (found in localStorage) -->
+      <div class="success" data-rsvp-registered hidden>
+        <svg class="success__flourish" viewBox="0 0 120 24" fill="none" aria-hidden="true">
+          <path
+            d="M4 12 C 30 2, 44 2, 60 12 C 76 22, 90 22, 116 12"
+            stroke="currentColor"
+            stroke-width="1.4"
+            stroke-linecap="round"></path>
+          <path d="M60 4.5 l4.5 7.5 -4.5 7.5 -4.5 -7.5 Z" fill="currentColor"></path>
+        </svg>
+        <h3 class="success__title">&iexcl;Gracias!</h3>
+        <p class="success__text">Tu respuesta ya ha sido registrada.</p>
+        <p class="success__text" data-registered-summary></p>
+        <p class="success__contact">
+          Si deseas cambiar tu respuesta, cont&aacute;ctanos directamente.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .rsvp {
+    position: relative;
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    background:
+      radial-gradient(120% 100% at 50% 0%, #10294d 0%, var(--color-navy-deep) 62%);
+  }
+
+  .rsvp__edge {
+    position: absolute;
+    top: clamp(1.25rem, 4vh, 2.5rem);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+
+  .rsvp__edge span {
+    height: 1px;
+    width: clamp(64px, 18vw, 140px);
+    background: linear-gradient(90deg, transparent, rgb(201 162 39 / 0.7));
+  }
+
+  .rsvp__edge span:last-child {
+    background: linear-gradient(90deg, rgb(201 162 39 / 0.7), transparent);
+  }
+
+  .rsvp__edge i {
+    width: 7px;
+    height: 7px;
+    rotate: 45deg;
+    background: var(--color-gold);
+  }
+
+  .rsvp__glow {
+    position: absolute;
+    left: 50%;
+    top: 55%;
+    width: min(130vw, 900px);
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(closest-side, rgb(201 162 39 / 0.08), transparent 72%);
+    pointer-events: none;
+  }
+
+  .rsvp__content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(0.9rem, 3vh, 1.5rem);
+    padding: clamp(4rem, 12vh, 7rem) 1.5rem;
+    width: 100%;
+    max-width: 560px;
+    text-align: center;
+  }
+
+  .rsvp__eyebrow {
+    font-size: clamp(0.72rem, 2.4vw, 0.85rem);
+    font-weight: 500;
+    letter-spacing: 0.42em;
+    text-indent: 0.42em;
+    text-transform: uppercase;
+    color: var(--color-gold-light);
+  }
+
+  .rsvp__title {
+    font-family: var(--font-title);
+    font-size: clamp(2.2rem, 8vw, 4rem);
+    font-weight: 600;
+    line-height: 1.05;
+    color: var(--color-cream);
+  }
+
+  .rsvp__divider {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+
+  .rsvp__divider span {
+    height: 1px;
+    width: clamp(48px, 12vw, 96px);
+    background: linear-gradient(90deg, transparent, var(--color-gold));
+  }
+
+  .rsvp__divider span:last-child {
+    background: linear-gradient(90deg, var(--color-gold), transparent);
+  }
+
+  .rsvp__divider i {
+    width: 7px;
+    height: 7px;
+    rotate: 45deg;
+    background: var(--color-gold);
+  }
+
+  /* Panel ------------------------------------------------------------------ */
+  .rsvp__panel {
+    width: min(100%, 480px);
+    margin-top: clamp(0.75rem, 3vh, 1.5rem);
+    border-radius: 18px;
+    border: 1px solid rgb(201 162 39 / 0.32);
+    background: rgb(255 255 255 / 0.04);
+    backdrop-filter: blur(8px);
+    padding: clamp(1.4rem, 4vw, 2rem);
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+    text-align: left;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .field__label {
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: rgb(230 201 106 / 0.85);
+  }
+
+  .field__label em {
+    font-style: normal;
+    letter-spacing: 0.08em;
+    text-transform: none;
+    color: rgb(250 246 238 / 0.45);
+  }
+
+  .field__input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border-radius: 12px;
+    border: 1px solid rgb(201 162 39 / 0.35);
+    background: rgb(7 20 39 / 0.55);
+    color: var(--color-cream);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 300;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .field__input::placeholder {
+    color: rgb(250 246 238 / 0.35);
+  }
+
+  .field__input:focus {
+    outline: none;
+    border-color: var(--color-gold-light);
+    box-shadow: 0 0 0 3px rgb(201 162 39 / 0.18);
+  }
+
+  .field__input--area {
+    resize: vertical;
+    min-height: 84px;
+  }
+
+  .field__input.is-invalid {
+    border-color: #e07a5f;
+    box-shadow: 0 0 0 3px rgb(224 122 95 / 0.15);
+  }
+
+  /* Guest greeting (personalized token invitations) */
+  .guest-name {
+    font-family: var(--font-title);
+    font-size: clamp(1.3rem, 4.5vw, 1.7rem);
+    font-style: italic;
+    font-weight: 600;
+    color: var(--color-cream);
+    text-align: center;
+    padding: 0.35rem 0 0.1rem;
+  }
+
+  /* Attendance segmented control */
+  .segmented {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 1px solid rgb(201 162 39 / 0.35);
+    border-radius: 9999px;
+    overflow: hidden;
+    background: rgb(7 20 39 / 0.55);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .segmented.is-invalid {
+    border-color: #e07a5f;
+    box-shadow: 0 0 0 3px rgb(224 122 95 / 0.15);
+  }
+
+  .segmented__option {
+    padding: 0.65rem 0.5rem;
+    border: none;
+    background: transparent;
+    color: rgb(250 246 238 / 0.6);
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  .segmented__option.is-active {
+    background: var(--color-gold);
+    color: var(--color-navy-deep);
+    font-weight: 500;
+  }
+
+  /* Attendees stepper */
+  .stepper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.4rem;
+    padding: 0.45rem 0;
+  }
+
+  .stepper__btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 9999px;
+    border: 1px solid rgb(201 162 39 / 0.5);
+    background: transparent;
+    color: var(--color-cream);
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.25s ease, transform 0.15s ease;
+  }
+
+  .stepper__btn:hover:not(:disabled) {
+    background: rgb(201 162 39 / 0.16);
+  }
+
+  .stepper__btn:active:not(:disabled) {
+    transform: scale(0.92);
+  }
+
+  .stepper__btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .stepper__value {
+    min-width: 3ch;
+    font-family: var(--font-title);
+    font-size: 2rem;
+    font-weight: 600;
+    text-align: center;
+    color: var(--color-gold-light);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Dimmed when the guest is not attending */
+  .stepper.is-muted {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  /* Feedback + submit */
+  .form__feedback {
+    font-size: 0.85rem;
+    font-weight: 300;
+    color: #e8a08c;
+    text-align: center;
+  }
+
+  .form__submit {
+    margin-top: 0.25rem;
+    padding: 0.95rem 1.5rem;
+    border: none;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #e6c96a 0%, #c9a227 60%, #a97e1c 100%);
+    color: var(--color-navy-deep);
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-indent: 0.22em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 14px 30px -14px rgb(201 162 39 / 0.8);
+    transition: filter 0.25s ease, transform 0.15s ease, opacity 0.25s ease;
+  }
+
+  .form__submit:hover:not(:disabled) {
+    filter: brightness(1.07);
+  }
+
+  .form__submit:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  .form__submit:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
+  /* Success ------------------------------------------------------------------ */
+  .success {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.9rem;
+    padding: clamp(1rem, 4vh, 2rem) 0.5rem;
+    text-align: center;
+  }
+
+  .success__flourish {
+    width: 110px;
+    color: var(--color-gold);
+  }
+
+  .success__title {
+    font-family: var(--font-title);
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: var(--color-cream);
+  }
+
+  .success__text {
+    max-width: 34ch;
+    font-size: 0.95rem;
+    font-weight: 300;
+    line-height: 1.7;
+    color: rgb(250 246 238 / 0.7);
+  }
+
+  .success__contact {
+    max-width: 34ch;
+    font-size: 0.82rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    color: rgb(230 201 106 / 0.85);
+  }
+</style>
+
+<script>
+  import { initRsvp } from "../scripts/rsvp";
+  initRsvp();
+</script>

@@ -1,0 +1,297 @@
+---
+/**
+ * Root view — private invitation gate.
+ * The full invitation (and RSVP) lives under /invitacion/[token]; here the
+ * guest enters their personal code to reach it.
+ */
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Stiven &amp; Milena — Nuestra Boda">
+  <main class="gate">
+    <!-- Printed-style double frame around the viewport -->
+    <div
+      class="pointer-events-none fixed inset-3 z-[60] rounded-[10px] border border-gold/25 sm:inset-5"
+      aria-hidden="true"
+    >
+      <div class="absolute inset-[5px] rounded-[6px] border border-gold/15"></div>
+    </div>
+
+    <!-- Paper grain overlay -->
+    <div class="grain pointer-events-none fixed inset-0 z-[70]" aria-hidden="true"></div>
+
+    <div class="gate__glow" aria-hidden="true"></div>
+
+    <!-- Floating gold / warm-blue dust -->
+    <canvas class="gate__particles" data-particles aria-hidden="true"></canvas>
+
+  <section class="gate__card">
+    <svg class="gate__flourish" viewBox="0 0 120 24" fill="none" aria-hidden="true">
+      <path
+        d="M4 12 C 30 2, 44 2, 60 12 C 76 22, 90 22, 116 12"
+        stroke="currentColor"
+        stroke-width="1.4"
+        stroke-linecap="round"></path>
+      <path d="M60 4.5 l4.5 7.5 -4.5 7.5 -4.5 -7.5 Z" fill="currentColor"></path>
+    </svg>
+
+    <p class="gate__names">Stiven <span>&amp;</span> Milena</p>
+    <h1 class="gate__title">Nuestra boda</h1>
+    <p class="gate__date">01 &middot; Noviembre &middot; 2026</p>
+
+    <div class="gate__divider" aria-hidden="true"><span></span><i></i><span></span></div>
+
+    <p class="gate__notice">
+      <svg class="gate__lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="5" y="10.5" width="14" height="9.5" rx="2.5"></rect>
+        <path d="M8 10.5 V7.5 a4 4 0 0 1 8 0 V10.5"></path>
+        <circle cx="12" cy="15.2" r="1.4"></circle>
+      </svg>
+      Esta es una invitaci&oacute;n privada
+    </p>
+
+    <form class="gate__form" data-gate-form novalidate>
+      <label class="gate__label" for="gate-code">C&oacute;digo de invitado</label>
+      <input
+        class="gate__input"
+        id="gate-code"
+        type="text"
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+        placeholder="Ej: k8f3x9a1"
+        data-gate-code
+      />
+      <button class="gate__submit" type="submit">Ver invitaci&oacute;n</button>
+      <p class="gate__feedback" data-gate-feedback role="alert" hidden></p>
+    </form>
+
+    <p class="gate__help">&iquest;No tienes tu c&oacute;digo? Escr&iacute;benos y con gusto te lo enviamos.</p>
+  </section>
+</main>
+</Layout>
+
+<style>
+  .gate {
+    position: relative;
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    padding: 1.5rem;
+    background:
+      radial-gradient(95% 75% at 50% 38%, #0d2445 0%, var(--color-navy-deep) 70%);
+  }
+
+  .gate__glow {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: min(120vw, 800px);
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(closest-side, rgb(201 162 39 / 0.1), transparent 72%);
+    pointer-events: none;
+  }
+
+  /* Floating dust above the glow, below the card */
+  .gate__particles {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .gate__card {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(0.8rem, 3vh, 1.3rem);
+    width: min(100%, 420px);
+    padding: clamp(2.2rem, 6vh, 3.2rem) clamp(1.6rem, 5vw, 2.6rem);
+    border-radius: 18px;
+    border: 1px solid rgb(201 162 39 / 0.35);
+    background: rgb(255 255 255 / 0.03);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 34px 70px -30px rgb(0 0 0 / 0.8);
+    text-align: center;
+  }
+
+  .gate__flourish {
+    width: 110px;
+    color: var(--color-gold);
+  }
+
+  .gate__names {
+    font-family: var(--font-title);
+    font-size: clamp(1.6rem, 6vw, 2.1rem);
+    font-weight: 600;
+    color: var(--color-cream);
+  }
+
+  .gate__names span {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--color-gold);
+  }
+
+  .gate__title {
+    margin-top: -0.6rem;
+    font-family: var(--font-title);
+    font-size: clamp(0.95rem, 3vw, 1.15rem);
+    font-weight: 500;
+    letter-spacing: 0.32em;
+    text-indent: 0.32em;
+    text-transform: uppercase;
+    color: #e6c96a;
+  }
+
+  .gate__date {
+    font-size: 0.68rem;
+    letter-spacing: 0.3em;
+    text-indent: 0.3em;
+    text-transform: uppercase;
+    color: rgb(250 246 238 / 0.5);
+  }
+
+  .gate__divider {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+
+  .gate__divider span {
+    height: 1px;
+    width: clamp(48px, 12vw, 80px);
+    background: linear-gradient(90deg, transparent, var(--color-gold));
+  }
+
+  .gate__divider span:last-child {
+    background: linear-gradient(90deg, var(--color-gold), transparent);
+  }
+
+  .gate__divider i {
+    width: 7px;
+    height: 7px;
+    rotate: 45deg;
+    background: var(--color-gold);
+  }
+
+  .gate__notice {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.5rem 1.1rem;
+    border-radius: 9999px;
+    border: 1px solid rgb(201 162 39 / 0.4);
+    background: rgb(7 20 39 / 0.55);
+    font-size: 0.78rem;
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    color: rgb(250 246 238 / 0.75);
+  }
+
+  .gate__lock {
+    width: 16px;
+    height: 16px;
+    color: #e6c96a;
+  }
+
+  /* Form --------------------------------------------------------------------- */
+  .gate__form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+    width: 100%;
+  }
+
+  .gate__label {
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: rgb(230 201 106 / 0.85);
+  }
+
+  .gate__input {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    border: 1px solid rgb(201 162 39 / 0.4);
+    background: rgb(7 20 39 / 0.65);
+    color: var(--color-cream);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    letter-spacing: 0.14em;
+    text-align: center;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .gate__input::placeholder {
+    color: rgb(250 246 238 / 0.3);
+    letter-spacing: 0.05em;
+  }
+
+  .gate__input:focus {
+    outline: none;
+    border-color: var(--color-gold-light);
+    box-shadow: 0 0 0 3px rgb(201 162 39 / 0.18);
+  }
+
+  .gate__input.is-invalid {
+    border-color: #e07a5f;
+    box-shadow: 0 0 0 3px rgb(224 122 95 / 0.15);
+  }
+
+  .gate__submit {
+    width: 100%;
+    padding: 0.9rem 1.5rem;
+    border: none;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #e6c96a 0%, #c9a227 60%, #a97e1c 100%);
+    color: var(--color-navy-deep);
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-indent: 0.22em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 14px 30px -14px rgb(201 162 39 / 0.8);
+    transition: filter 0.25s ease, transform 0.15s ease;
+  }
+
+  .gate__submit:hover {
+    filter: brightness(1.07);
+  }
+
+  .gate__submit:active {
+    transform: scale(0.98);
+  }
+
+  .gate__feedback {
+    font-size: 0.85rem;
+    font-weight: 300;
+    color: #e8a08c;
+  }
+
+  .gate__help {
+    max-width: 30ch;
+    font-size: 0.78rem;
+    font-weight: 300;
+    line-height: 1.6;
+    color: rgb(250 246 238 / 0.45);
+  }
+</style>
+
+<script>
+  import { initGate } from "../scripts/gate";
+  import { initParticles } from "../scripts/particles";
+  initGate();
+  initParticles();
+</script>

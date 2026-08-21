@@ -1,0 +1,39 @@
+---
+/**
+ * 404 — friendly fallback for invalid invitation links.
+ */
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Enlace no encontrado — Stiven & Milena">
+  <main
+    class="grid min-h-dvh place-items-center bg-navy-deep px-6 text-center"
+  >
+    <div class="flex flex-col items-center gap-5">
+      <svg class="w-24 text-gold" viewBox="0 0 120 24" fill="none" aria-hidden="true">
+        <path
+          d="M4 12 C 30 2, 44 2, 60 12 C 76 22, 90 22, 116 12"
+          stroke="currentColor"
+          stroke-width="1.4"
+          stroke-linecap="round"></path>
+        <path d="M60 4.5 l4.5 7.5 -4.5 7.5 -4.5 -7.5 Z" fill="currentColor"></path>
+      </svg>
+
+      <h1 class="font-title text-3xl font-semibold text-cream sm:text-4xl">
+        Enlace o c&oacute;digo no encontrado
+      </h1>
+
+      <p class="max-w-[38ch] text-sm font-light leading-relaxed text-cream/65">
+        Por favor cont&aacute;ctanos si crees que es un error; con gusto te ayudaremos
+        a llegar a tu invitaci&oacute;n.
+      </p>
+
+      <a
+        href="/"
+        class="mt-2 rounded-full border border-gold/50 px-6 py-3 text-xs font-medium uppercase tracking-[0.22em] text-gold-light transition-colors hover:bg-gold hover:text-navy-deep"
+      >
+        Ir al inicio
+      </a>
+    </div>
+  </main>
+</Layout>

@@ -1,0 +1,25 @@
+---
+/**
+ * Personalized invitation route: /invitacion/[token]
+ *
+ * One static page is generated per guest token in src/data/invitados.json.
+ * Unknown tokens fall through to the site's 404 page (friendly message).
+ */
+import InvitationPage from "../../components/InvitationPage.astro";
+import guests from "../../data/invitados.json";
+
+export function getStaticPaths() {
+  return Object.entries(guests).map(([token, guest]) => ({
+    params: { token },
+    props: {
+      guestName: guest.name,
+      allowedSlots: guest.allowedSlots,
+    },
+  }));
+}
+
+const { token } = Astro.params;
+const { guestName, allowedSlots } = Astro.props;
+---
+
+<InvitationPage guestName={guestName} allowedSlots={allowedSlots} token={token} />

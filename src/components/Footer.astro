@@ -1,0 +1,104 @@
+---
+/**
+ * Site footer: couple monogram, date and a loving sign-off.
+ */
+---
+
+<footer class="footer">
+  <div class="footer__divider" aria-hidden="true">
+    <span></span><i></i><span></span>
+  </div>
+
+  <p class="footer__names">Stiven <span>&amp;</span> Milena</p>
+  <p class="footer__date">01 &middot; Noviembre &middot; 2026</p>
+
+  <a class="footer__top" href="#confirmar">Confirmar asistencia</a>
+
+  <p class="footer__note">Hecho con amor para nuestros seres queridos</p>
+</footer>
+
+<style>
+  .footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+    padding: clamp(3rem, 9vh, 5rem) 1.5rem calc(clamp(3rem, 9vh, 5rem) + env(safe-area-inset-bottom));
+    text-align: center;
+    background: linear-gradient(180deg, var(--color-navy-deep) 0%, #04101f 100%);
+  }
+
+  .footer__divider {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .footer__divider span {
+    height: 1px;
+    width: clamp(48px, 12vw, 96px);
+    background: linear-gradient(90deg, transparent, rgb(201 162 39 / 0.7));
+  }
+
+  .footer__divider span:last-child {
+    background: linear-gradient(90deg, rgb(201 162 39 / 0.7), transparent);
+  }
+
+  .footer__divider i {
+    width: 7px;
+    height: 7px;
+    rotate: 45deg;
+    background: var(--color-gold);
+  }
+
+  .footer__names {
+    font-family: var(--font-title);
+    font-size: clamp(1.7rem, 6vw, 2.4rem);
+    font-weight: 600;
+    color: var(--color-cream);
+  }
+
+  .footer__names span {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--color-gold);
+  }
+
+  .footer__date {
+    font-size: 0.72rem;
+    letter-spacing: 0.34em;
+    text-indent: 0.34em;
+    text-transform: uppercase;
+    color: rgb(250 246 238 / 0.55);
+  }
+
+  .footer__top {
+    margin-top: 1.1rem;
+    padding: 0.65rem 1.5rem;
+    border-radius: 9999px;
+    border: 1px solid rgb(201 162 39 / 0.5);
+    color: var(--color-gold-light);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-indent: 0.22em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  .footer__top:hover,
+  .footer__top:focus-visible {
+    background: var(--color-gold);
+    color: var(--color-navy-deep);
+  }
+
+  .footer__note {
+    margin-top: 1.4rem;
+    font-size: 0.75rem;
+    font-weight: 300;
+    font-style: italic;
+    color: rgb(250 246 238 / 0.4);
+  }
+</style>

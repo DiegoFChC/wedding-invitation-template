@@ -1,0 +1,198 @@
+---
+/**
+ * Section 2 — The invitation: wedding date + live countdown.
+ * Deep navy canvas for a clear contrast against the warm hero section.
+ */
+---
+
+<section id="invitacion" class="info" aria-label="Fecha de la boda y cuenta regresiva">
+  <!-- Gold ornament marking the section boundary -->
+  <div class="info__edge" aria-hidden="true"><span></span><i></i><span></span></div>
+
+  <div class="info__glow" aria-hidden="true"></div>
+
+  <div class="info__content">
+    <p class="info__eyebrow" data-info-animate>Te esperamos</p>
+
+    <h2 class="info__date" data-info-animate>
+      Domingo, 1 de Noviembre
+      <span>de 2026</span>
+    </h2>
+
+    <div class="info__divider" data-info-animate aria-hidden="true">
+      <span></span><i></i><span></span>
+    </div>
+
+    <!-- Live countdown (populated by src/scripts/countdown.ts) -->
+    <div class="countdown" data-info-animate role="timer" aria-label="Cuenta regresiva para la boda">
+      <div class="countdown__cell">
+        <span class="countdown__value" data-countdown="days">--</span>
+        <span class="countdown__label">D&iacute;as</span>
+      </div>
+      <div class="countdown__cell">
+        <span class="countdown__value" data-countdown="hours">--</span>
+        <span class="countdown__label">Horas</span>
+      </div>
+      <div class="countdown__cell">
+        <span class="countdown__value" data-countdown="minutes">--</span>
+        <span class="countdown__label">Min</span>
+      </div>
+      <div class="countdown__cell">
+        <span class="countdown__value" data-countdown="seconds">--</span>
+        <span class="countdown__label">Seg</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .info {
+    position: relative;
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    background:
+      radial-gradient(120% 100% at 50% 0%, #10294d 0%, var(--color-navy-deep) 62%);
+  }
+
+  /* Boundary ornament: gold hairlines meeting a diamond */
+  .info__edge {
+    position: absolute;
+    top: clamp(1.25rem, 4vh, 2.5rem);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+
+  .info__edge span {
+    height: 1px;
+    width: clamp(64px, 18vw, 140px);
+    background: linear-gradient(90deg, transparent, rgb(201 162 39 / 0.7));
+  }
+
+  .info__edge span:last-child {
+    background: linear-gradient(90deg, rgb(201 162 39 / 0.7), transparent);
+  }
+
+  .info__edge i {
+    width: 7px;
+    height: 7px;
+    rotate: 45deg;
+    background: var(--color-gold);
+  }
+
+  .info__glow {
+    position: absolute;
+    left: 50%;
+    top: 55%;
+    width: min(130vw, 900px);
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(closest-side, rgb(201 162 39 / 0.08), transparent 72%);
+    pointer-events: none;
+  }
+
+  .info__content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(1rem, 3.5vh, 1.8rem);
+    padding: clamp(4rem, 12vh, 7rem) 1.5rem;
+    text-align: center;
+  }
+
+  .info__eyebrow {
+    font-size: clamp(0.72rem, 2.4vw, 0.85rem);
+    font-weight: 500;
+    letter-spacing: 0.42em;
+    text-indent: 0.42em;
+    text-transform: uppercase;
+    color: var(--color-gold-light);
+  }
+
+  .info__date {
+    font-family: var(--font-title);
+    font-size: clamp(2.2rem, 8vw, 4.2rem);
+    font-weight: 600;
+    line-height: 1.12;
+    color: var(--color-cream);
+  }
+
+  .info__date span {
+    display: block;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--color-gold-light);
+  }
+
+  .info__divider {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+
+  .info__divider span {
+    height: 1px;
+    width: clamp(48px, 12vw, 96px);
+    background: linear-gradient(90deg, transparent, var(--color-gold));
+  }
+
+  .info__divider span:last-child {
+    background: linear-gradient(90deg, var(--color-gold), transparent);
+  }
+
+  .info__divider i {
+    width: 7px;
+    height: 7px;
+    rotate: 45deg;
+    background: var(--color-gold);
+  }
+
+  /* Countdown -------------------------------------------------------------- */
+  .countdown {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(0.5rem, 2.5vw, 1rem);
+    width: min(92vw, 520px);
+  }
+
+  .countdown__cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: clamp(0.8rem, 3vw, 1.3rem) 0.5rem;
+    border-radius: 14px;
+    border: 1px solid rgb(201 162 39 / 0.28);
+    background: rgb(255 255 255 / 0.04);
+    backdrop-filter: blur(6px);
+  }
+
+  .countdown__value {
+    font-family: var(--font-title);
+    font-size: clamp(1.9rem, 8vw, 3.1rem);
+    font-weight: 600;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-gold-light);
+  }
+
+  .countdown__label {
+    font-size: 0.6rem;
+    font-weight: 400;
+    letter-spacing: 0.3em;
+    text-indent: 0.3em;
+    text-transform: uppercase;
+    color: rgb(250 246 238 / 0.55);
+  }
+</style>
+
+<script>
+  import { initCountdown } from "../scripts/countdown";
+  initCountdown();
+</script>

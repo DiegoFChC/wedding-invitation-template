@@ -1,0 +1,251 @@
+---
+/**
+ * Section 1 — Main reveal: "Nuestra boda" with the couple's names.
+ * Warm cream canvas decorated with the couple's blue floral artwork,
+ * kept airy: two corner arrangements, clean center.
+ */
+// `?url` makes Vite return the asset URL string; a bare .svg import would
+// return an Astro SVG component instead of something <img src> can use.
+import flowersMirrorSource from "../assets/flowers.svg?url";
+import flowersSoft from "../assets/flowers1.svg?url";
+---
+
+<section id="inicio" class="hero" aria-label="Stiven y Milena — Nuestra boda">
+  <!-- Soft floral watermark, top-left -->
+  <img
+    class="hero__flower hero__flower--soft"
+    data-parallax="soft"
+    src={flowersSoft}
+    alt=""
+    aria-hidden="true"
+    decoding="async"
+  />
+
+  <!-- Mirrored arrangement anchoring the bottom-right corner -->
+  <div class="hero__flower-wrap hero__flower-wrap--mirror" data-parallax="fast" aria-hidden="true">
+    <img class="hero__flower-img" src={flowersMirrorSource} alt="" decoding="async" />
+  </div>
+
+  <!-- Soft warm washes for depth -->
+  <div class="hero__wash hero__wash--amber" aria-hidden="true"></div>
+  <div class="hero__wash hero__wash--blue" aria-hidden="true"></div>
+
+  <!-- Floating gold / warm-blue dust -->
+  <canvas class="hero__particles" data-particles aria-hidden="true"></canvas>
+
+  <div class="hero__content">
+    <svg class="hero__flourish" data-hero-flourish viewBox="0 0 120 24" fill="none" aria-hidden="true">
+      <path
+        data-flourish-line
+        d="M4 12 C 30 2, 44 2, 60 12 C 76 22, 90 22, 116 12"
+        stroke="currentColor"
+        stroke-width="1.4"
+        stroke-linecap="round"></path>
+      <path data-flourish-gem d="M60 4.5 l4.5 7.5 -4.5 7.5 -4.5 -7.5 Z" fill="currentColor"></path>
+    </svg>
+
+    <p class="hero__eyebrow" data-hero-animate>Nuestra boda</p>
+
+    <!-- Names stack on mobile, sit side by side from sm up -->
+    <h1 class="hero__names">
+      <span class="hero__name" data-hero-name-left>Stiven</span>
+      <span class="hero__amp" data-hero-amp>&amp;</span>
+      <span class="hero__name" data-hero-name-right>Milena</span>
+    </h1>
+
+    <div class="hero__divider" data-hero-divider aria-hidden="true">
+      <span></span><i></i><span></span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    background: linear-gradient(180deg, #fdf8ee 0%, #f6eeda 55%, #efe2c6 100%);
+  }
+
+  /* Florals ------------------------------------------------------------- */
+  .hero__flower {
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+    user-select: none;
+    will-change: transform;
+  }
+
+  /* Soft floral watermark, top-left */
+  .hero__flower--soft {
+    top: 2%;
+    left: -12%;
+    width: min(68vw, 660px);
+    opacity: 0.38;
+  }
+
+  @media (max-width: 639px) {
+    .hero__flower--soft {
+      top: 1%;
+      left: -32%;
+      width: 82vw;
+      opacity: 0.24;
+    }
+
+    /* Smaller but still present: the diagonal keeps its balance on phones */
+    .hero__flower-wrap--mirror {
+      bottom: -5%;
+      right: -16%;
+      width: 74vw;
+      opacity: 0.28;
+    }
+  }
+
+  /* Warm washes ---------------------------------------------------------- */
+  /* Layering: washes (0) < florals (1) < particles (2) < content (10) */
+  .hero__wash {
+    position: absolute;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .hero__particles {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  /* Mirrored bottom-right arrangement (inner img carries the CSS mirror so
+     GSAP transforms on the wrapper never fight it) */
+  .hero__flower-wrap {
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  .hero__flower-wrap--mirror {
+    bottom: -8%;
+    right: -7%;
+    width: 58%;
+    /* Watermark treatment, matching the top-left arrangement */
+    opacity: 0.4;
+  }
+
+  .hero__flower-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    transform: scaleX(-1);
+  }
+
+  @media (max-width: 639px) {
+    .hero__flower-wrap--mirror {
+      display: none;
+    }
+  }
+
+  .hero__wash--amber {
+    inset: auto -20% -30% auto;
+    width: 70vw;
+    aspect-ratio: 1;
+    background: radial-gradient(closest-side, rgb(206 140 58 / 0.16), transparent 70%);
+  }
+
+  .hero__wash--blue {
+    inset: -25% auto auto -20%;
+    width: 60vw;
+    aspect-ratio: 1;
+    background: radial-gradient(closest-side, rgb(47 82 138 / 0.12), transparent 70%);
+  }
+
+  /* Content ---------------------------------------------------------------- */
+  .hero__content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(0.9rem, 3vh, 1.6rem);
+    padding: clamp(3rem, 10vh, 6rem) 1.5rem;
+    text-align: center;
+  }
+
+  .hero__flourish {
+    width: clamp(90px, 18vw, 150px);
+    color: var(--color-gold);
+  }
+
+  .hero__eyebrow {
+    font-size: clamp(0.72rem, 2.4vw, 0.85rem);
+    font-weight: 500;
+    letter-spacing: 0.42em;
+    text-indent: 0.42em;
+    text-transform: uppercase;
+    color: #a07c17;
+  }
+
+  .hero__names {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1em;
+    font-family: var(--font-title);
+    line-height: 1;
+    color: var(--color-navy);
+  }
+
+  .hero__name {
+    font-size: clamp(3.2rem, 15vw, 6.5rem);
+    font-weight: 600;
+  }
+
+  .hero__amp {
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(1.7rem, 7vw, 3.2rem);
+    padding: 0.08em 0;
+    color: var(--color-gold);
+  }
+
+  @media (min-width: 640px) {
+    .hero__names {
+      flex-direction: row;
+      align-items: baseline;
+      gap: 0.35em;
+    }
+  }
+
+  .hero__divider {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+
+  .hero__divider span {
+    height: 1px;
+    width: clamp(48px, 12vw, 96px);
+    background: linear-gradient(90deg, transparent, var(--color-gold));
+  }
+
+  .hero__divider span:last-child {
+    background: linear-gradient(90deg, var(--color-gold), transparent);
+  }
+
+  .hero__divider i {
+    width: 7px;
+    height: 7px;
+    rotate: 45deg;
+    background: var(--color-gold);
+  }
+</style>
+
+<script>
+  import { initParticles } from "../scripts/particles";
+  initParticles();
+</script>

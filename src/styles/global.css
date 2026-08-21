@@ -1,0 +1,62 @@
+/* --------------------------------------------------------------------------
+ * Global styles — wedding invitation
+ * Tailwind 4: tokens declared in @theme become utilities
+ * (bg-navy, text-gold, font-title, ...).
+ * ------------------------------------------------------------------------ */
+@import "tailwindcss";
+
+@theme {
+  /* Palette: deep navy primary, soft cream paper tones, elegant gold */
+  --color-navy: #0b1f3a; /* primary navy */
+  --color-navy-deep: #071427; /* page background */
+  --color-navy-soft: #16305a; /* raised surfaces */
+  --color-cream: #faf6ee; /* paper / light text */
+  --color-cream-dark: #efe6d4; /* aged paper shade */
+  --color-gold: #c9a227; /* classic gold */
+  --color-gold-light: #e6c96a; /* highlight gold */
+
+  /* Typography */
+  --font-title: "Cormorant Garamond", Georgia, serif;
+  --font-body: "Inter", system-ui, sans-serif;
+}
+
+/* Base ------------------------------------------------------------------ */
+/* Native smooth scrolling + snap only for reduced-motion users; everyone
+   else gets GSAP-driven section navigation (scrollEffects.ts), which would
+   fight the browser's own smoothing. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: smooth;
+    scroll-snap-type: y proximity;
+  }
+
+  main > section {
+    scroll-snap-align: start;
+  }
+}
+
+body {
+  min-height: 100dvh;
+  background-color: var(--color-navy-deep);
+  color: var(--color-cream);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background-color: var(--color-gold);
+  color: var(--color-navy-deep);
+}
+
+/* Decorative helpers ----------------------------------------------------- */
+
+/* Soft golden halo used behind focal elements */
+.gold-halo {
+  background: radial-gradient(closest-side, rgb(201 162 39 / 0.22), transparent 72%);
+}
+
+/* Film-grain overlay for a printed-paper feel */
+.grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+}
