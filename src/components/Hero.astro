@@ -62,7 +62,9 @@ import flowersSoft from "../assets/flowers1.svg?url";
 <style>
   .hero {
     position: relative;
+    /* lvh (stable against the mobile URL bar) with dvh fallback */
     min-height: 100dvh;
+    min-height: 100lvh;
     display: grid;
     place-items: center;
     overflow: hidden;
@@ -94,12 +96,13 @@ import flowersSoft from "../assets/flowers1.svg?url";
       opacity: 0.24;
     }
 
-    /* Smaller but still present: the diagonal keeps its balance on phones */
+    /* Smaller but still present: the diagonal keeps its balance on phones.
+       Sits fully inside the viewport so it is always visible. */
     .hero__flower-wrap--mirror {
-      bottom: -5%;
-      right: -16%;
-      width: 74vw;
-      opacity: 0.28;
+      bottom: 5%;
+      right: -18%;
+      width: 88vw;
+      opacity: 0.7;
     }
   }
 
@@ -140,6 +143,8 @@ import flowersSoft from "../assets/flowers1.svg?url";
   .hero__flower-img {
     display: block;
     width: 100%;
+    /* Explicit ratio: SVGs without intrinsic size can collapse in <img> */
+    aspect-ratio: 1762 / 549;
     height: auto;
     transform: scaleX(-1);
   }
@@ -201,7 +206,7 @@ import flowersSoft from "../assets/flowers1.svg?url";
   }
 
   .hero__name {
-    font-size: clamp(3.2rem, 15vw, 6.5rem);
+    font-size: clamp(2.8rem, 14vw, 6rem);
     font-weight: 600;
   }
 

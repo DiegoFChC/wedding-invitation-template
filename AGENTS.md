@@ -1,69 +1,58 @@
-## Development
+# AGENTS.md
 
-Run from the repo root. Node `>=22.12.0` is required (see `engines` in `package.json`).
+Instructions for AI coding sessions working on this repo (interactive wedding invitation).
 
-Dev server — **always start in background mode**:
+Stack: Astro 7 (static, no adapter) + Tailwind CSS 4 + GSAP 3. Node >= 22.12.
 
-```
-astro dev --background
-```
+## Commands
 
-Manage the running server with: `astro dev stop`, `astro dev status`, `astro dev logs`.
-Local URL: `http://localhost:4321`.
-
-Available npm scripts (see `package.json`):
-- `npm run dev` → `astro dev`
-- `npm run build` → `astro build` (outputs static files to `dist/`)
-- `npm run preview` → preview the build locally
-- `npm run astro ...` → run any Astro CLI command, e.g. `npm run astro add X`
-
-There are **no lint, format, typecheck, or test scripts**. `npx astro check` is NOT ready out of the box — it additionally requires installing `npm i -D @astrojs/check typescript` before it will run.
-
-## Toolchain and versions
-
-- Astro `^7.2.4`, Tailwind CSS `4` (via `@tailwindcss/vit`), GSAP `3.15`.
-- `astro.config.mjs` registers the Tailwind Vite plugin; no SSR adapter (static site).
-- `tsconfig.json` extends `astro/tsconfigs/strict`.
-- TypeScript is present only transitively — do not add it to `package.json` unless needed.
-
-## Code conventions
-
-- **All code is written in English.**
-- Layout imports `src/styles/global.css` in its frontmatter (`<head>` lives in `src/layouts/Layout.astro`).
-- Project layout: `src/pages/` (routes), `src/layouts/`, `src/components/`, `src/scripts/` (client JS), `src/styles/`.
-- No couple photos. Keep the aesthetic: navy/deep-blue, cream/soft-white, gold accents.
-
-## Tailwind 4 specifics (guess these wrong at your peril)
-
-- Do **not** use the legacy `@tailwind base; @tailwind components; @tailwind utilities;` directives.
-- global.css starts with `@import "tailwindcss";`
-- Custom design tokens (colors, fonts) go in an `@theme { }` block in `src/styles/global.css`:
-  `-color-navy`, `--color-gold`, `--font-title` (Cormorant Garamond), `--font-body` (Inter).
-  They become ready-made utility names like `bg-navy`, `text-gold`, `font-title`.
-- Google Fonts are loaded via `<link>` in `Layout.astro` (preconnect to `fonts.googleapis.com` / `fonts.gstatic.com`). Do not `@import` them inside CSS.
-
-## Critical Astro + GSAP quirk
-
-A `<script>` inside a `.astro` file is **inert on the client** unless it carries a hydration directive.
-Any interactive/client JS (e.g. the GSAP envelope animation) must use:
-
-```astro
-<script type="module" client:load>
-  import { initEnvelope } from "../scripts/envelopeAnimation";
-  initEnvelope();
-</script>
+```bash
+npm run dev            # starts the dev server IN BACKGROUND and returns immediately
+npm run build          # production build -> dist/  (this is THE verification step)
+npx astro dev status | logs | stop
 ```
 
-Without `client:load`/`client:idle`/`client:visible`, the script never executes in the browser.
-This applies to `src/components/Envelop.astro`, which drives the flap-open + card-reveal animation with GSAP.
+- There are **no lint / test / typecheck scripts**. Verify changes with `npm run build`.
+- `npx astro check` requires `npm i -D @astrojs/check typescript` first (not installed).
+- Do **not** run `astro dev --background` (documented nowhere else; it hangs forever with no output).
+- If HTTP checks hit `localhost:4321`, confirm the server first: `npx astro dev status`. After heavy edits the served module can be stale — restart with `stop` + `npm run dev`.
 
-## Documentation
+## Verified Astro quirks in this repo (do not regress)
 
-Full documentation: https://docs.astro.build
+- **Never add hydration directives to plain scripts.** `<script type="module" client:load>` inside `.astro` builds to a RAW unprocessed script whose relative imports 404 in `dist/`. Use a normal processed `<script>` (Astro bundles it into `_astro/*.js`). This contradicts older notes/CLAUDE.md — trust this section.
+- **Bare `.svg` imports return an Astro component**, not a URL. For `<img src>` you need the Vite suffix: `import flowers from "../assets/flowers.svg?url"`. Symptom of getting it wrong: `src="(...args) =>"` in the rendered HTML.
+- The florals in `src/assets/flowers*.svg` are ~3 MB Illustrator exports (no intrinsic width/height attrs). When placing them via `<img>`, set sizes explicitly (e.g. `aspect-ratio` / viewport units); percentage heights collapse under parents that only have `min-height`.
 
-- [Adding pages, dynamic routes, or middleware](https://docs.astro.build/en/guides/routing/)
-- [Working with Astro components](https://docs.astro.build/en/basics/astro-components/)
-- [Using React, Vue, Svelte, or other framework components](https://docs.astro.build/en/guides/framework-components/)
-- [Adding or managing content](https://docs.astro.build/en/guides/content-collections/)
-- [Adding styles or using Tailwind](https://docs.astro.build/en/guides/styling/)
-- [Supporting multiple languages](https://docs.astro.build/en/guides/internationalization/)
+## Architecture
+
+Page flow (all sections are `main > section`, each visually full-height):
+
+1. `Envelop.astro` — **fixed, opaque-navy overlay** shown on load (wax-seal button). On tap, GSAP opens flap -> card slides out -> overlay fades and dispatches `window` event `"envelope:opened"`. Body scroll stays locked until then; `<noscript>` hides the overlay.
+2. `Hero.astro` (names) -> `WeddingInfo.astro` (date + live countdown) -> `Schedule.astro` (timeline + Google Maps embed) -> `Rsvp.astro` (form) -> `Footer.astro` (outside `main`).
+3. `/` renders `PrivateGate.astro` (code input only — no private data). Personalized invites render `InvitationPage.astro` from `src/pages/invitacion/[token].astro` via `getStaticPaths()` over `src/data/invitados.json`. Unknown tokens land on the friendly `404.astro`.
+
+Client scripts (`src/scripts/`) — one owner per concern, wired from each component's own `<script>` tag:
+
+| File | Owns |
+| --- | --- |
+| `scrollEffects.ts` | ALL scroll behavior: hero intro (waits for `"envelope:opened"`), parallax, section entrances, wheel/touch/keyboard navigation |
+| `envelopeAnimation.ts` | Seal -> flap -> card timeline; scroll lock/unlock; broadcasts `"envelope:opened"` |
+| `particles.ts` | Canvas dust (reused on Hero, Envelop scene, Gate); pauses off-screen; reduced-motion = static frame |
+| `countdown.ts` | Wedding date constant `TARGET` lives here |
+| `rsvp.ts` | Form validation, localStorage persistence, success/registered states |
+
+Scroll-navigation contract (easy to break): gesture snapping applies **only between sections 0 and 1** (`NAV_LIMIT` in `scrollEffects.ts`); everything after scrolls natively so long sections stay reachable. Sections must keep `min-height: 100lvh` (with `100dvh` fallback line before it) — using only `dvh` makes the mobile URL-bar resize expose the previous section.
+
+GSAP conventions here: all motion goes through `gsap.matchMedia()` with `prefers-reduced-motion` conditions (reduce => jump to final state / native scrolling). Elements animated on reveal are hidden via `gsap.set` **at startup** and revealed with `.to()` timelines — never `gsap.from()` at trigger time (caused a visible double-animation bug before). Scripts select elements via `data-*` attributes (`[data-hero-name-left]`, `[data-timeline-line]`, ...); Astro scoped styles don't interfere.
+
+## Data & pending work
+
+- Guest data: `src/data/invitados.json` — `{ token: { name, allowedSlots } }`. Stepper max and guest greeting derive from it.
+- RSVP answers persist to `localStorage` key `rsvp_confirmado_<token>` and are logged to the console. The Google Apps Script / Google Sheets POST is **not wired yet** (next planned task).
+
+## Conventions
+
+- Identifiers and comments in **English**; user-facing copy in **Spanish**. Code carries explanatory comments (owner preference — do not strip them).
+- Tailwind 4: no legacy `@tailwind` directives; design tokens live in the `@theme` block of `src/styles/global.css` (`--color-navy*`, `--color-gold*`, `--color-cream*`, `--font-title` = Cormorant Garamond, `--font-body` = Inter) and become utilities (`bg-navy-deep`, `text-gold-light`, `font-title`). Google Fonts load via `<link>` in `Layout.astro`, never `@import` in CSS.
+- Aesthetic guardrails: navy/deep-blue primary, cream paper tones, gold accents; no couple photos; florals come from `src/assets/*.svg` (mirrored/repositioned copies are fine).
+- Editable business constants are intentionally co-located: wedding date in `countdown.ts`, venue/address/map coords in `Schedule.astro` frontmatter, couple name/title in `Layout.astro` defaults.

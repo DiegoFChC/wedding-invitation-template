@@ -222,14 +222,15 @@ export function initScrollEffects(): void {
       /* ------------------------------------------------------------------ */
       /* Section navigation                                                  */
       /*                                                                      */
-      /* One gesture = one section (immediate tween, like a deck). Sections   */
-      /* taller than the viewport scroll NATIVELY inside; only when the       */
-      /* user reaches their leading edge does the next gesture jump to the    */
-      /* adjacent section. Nothing is ever unreachable.                       */
+      /* One gesture = one section, ONLY between the first two sections       */
+      /* (names <-> date). From section 3 onward scrolling is fully native,   */
+      /* so long sections stay freely reachable.                              */
       /* ------------------------------------------------------------------ */
       const sections = Array.from(document.querySelectorAll<HTMLElement>("main > section"));
       if (sections.length === 0) return;
 
+      /** Last section index reachable through gesture snapping. */
+      const NAV_LIMIT = 1;
       const OVERSIZE_MARGIN = 8;
       let animating = false;
       let cooldownUntil = 0;
@@ -259,8 +260,9 @@ export function initScrollEffects(): void {
       const busy = () => animating || Date.now() < cooldownUntil;
 
       const navigate = (dir: 1 | -1) => {
-        const target = Math.max(0, Math.min(sections.length - 1, currentIndex() + dir));
-        if (target === currentIndex()) return false;
+        const current = currentIndex();
+        const target = current + dir;
+        if (target === current || target < 0 || target > NAV_LIMIT) return false;
 
         animating = true;
         gsap.to(window, {
@@ -278,6 +280,7 @@ export function initScrollEffects(): void {
       /** Shared decision for wheel / touch / keyboard. Returns true if handled. */
       const onGesture = (dir: 1 | -1): boolean => {
         if (busy()) return true; // handled: keep native input suppressed
+        if (currentIndex() > NAV_LIMIT) return false; // native beyond section 2
         if (!atLeadingEdge(dir)) return false; // free native scroll inside tall section
         return navigate(dir);
       };
@@ -331,12 +334,9 @@ export function initScrollEffects(): void {
         else if (event.key === "ArrowUp" || event.key === "PageUp") dir = -1;
         if (dir === 0) return;
 
-        if (busy() || atLeadingEdge(dir)) {
-          event.preventDefault();
-          if (!busy()) navigate(dir);
-        }
-        // else: native key scrolling inside tall sections
+        if (onGesture(dir)) event.preventDefault();
       });
     },
   );
 }
+

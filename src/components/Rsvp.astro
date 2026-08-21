@@ -144,6 +144,7 @@ const defaultAttendees = Math.min(2, maxSlots);
   .rsvp {
     position: relative;
     min-height: 100dvh;
+    min-height: 100lvh;
     display: grid;
     place-items: center;
     overflow: hidden;
@@ -213,7 +214,7 @@ const defaultAttendees = Math.min(2, maxSlots);
 
   .rsvp__title {
     font-family: var(--font-title);
-    font-size: clamp(2.2rem, 8vw, 4rem);
+    font-size: clamp(2rem, 8vw, 4rem);
     font-weight: 600;
     line-height: 1.05;
     color: var(--color-cream);
