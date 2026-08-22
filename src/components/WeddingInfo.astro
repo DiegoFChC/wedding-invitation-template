@@ -1,8 +1,11 @@
 ---
 /**
  * Section 2 — The invitation: wedding date + live countdown.
- * Deep navy canvas for a clear contrast against the warm hero section.
+ * Deep navy canvas for a clear contrast against the warm hero section,
+ * with faint luminous florals watermarked into the corners.
  */
+import flowersTop from "../assets/flowers1.svg?url";
+import flowersBottom from "../assets/flowers2.svg?url";
 ---
 
 <section id="invitacion" class="info" aria-label="Fecha de la boda y cuenta regresiva">
@@ -10,6 +13,16 @@
   <div class="info__edge" aria-hidden="true"><span></span><i></i><span></span></div>
 
   <div class="info__glow" aria-hidden="true"></div>
+
+  <!-- Faint floral watermarks (screen blend glows softly over the navy) -->
+  <img class="info__floral info__floral--top" src={flowersTop} alt="" aria-hidden="true" decoding="async" />
+  <img
+    class="info__floral info__floral--bottom"
+    src={flowersBottom}
+    alt=""
+    aria-hidden="true"
+    decoding="async"
+  />
 
   <div class="info__content">
     <p class="info__eyebrow" data-info-animate>Te esperamos</p>
@@ -94,6 +107,30 @@
     transform: translate(-50%, -50%);
     background: radial-gradient(closest-side, rgb(201 162 39 / 0.08), transparent 72%);
     pointer-events: none;
+  }
+
+  /* Faint floral watermarks */
+  .info__floral {
+    position: absolute;
+    mix-blend-mode: screen;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .info__floral--top {
+    top: -12%;
+    right: -14%;
+    width: min(70vw, 560px);
+    rotate: 8deg;
+    opacity: 0.18;
+  }
+
+  .info__floral--bottom {
+    bottom: -16%;
+    left: -12%;
+    width: min(60vw, 500px);
+    transform: scaleX(-1);
+    opacity: 0.13;
   }
 
   .info__content {

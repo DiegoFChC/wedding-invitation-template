@@ -1,8 +1,8 @@
 ---
 /**
  * Section 3 — Day schedule: ceremony and reception times, plus venue map.
- * Warm canvas echoing the hero, with a golden timeline that draws itself
- * on scroll and interactive event cards.
+ * Warm canvas echoing the hero (with faint floral watermarks), a golden
+ * timeline that draws itself on scroll and interactive event cards.
  */
 
 // Placeholder venue — edit these once confirmed
@@ -12,6 +12,9 @@ const LAT = 3.4006130054259107;
 const LNG = -76.52475981844162;
 const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${LAT},${LNG}`;
 const MAPS_EMBED_URL = `https://maps.google.com/maps?q=${LAT},${LNG}&z=14&output=embed`;
+
+import flowersTop from "../assets/flowers1.svg?url";
+import flowersBottom from "../assets/flowers.svg?url";
 ---
 
 <section id="cronograma" class="schedule" aria-label="Cronograma de la boda">
@@ -19,6 +22,16 @@ const MAPS_EMBED_URL = `https://maps.google.com/maps?q=${LAT},${LNG}&z=14&output
   <div class="schedule__edge" aria-hidden="true"><span></span><i></i><span></span></div>
 
   <div class="schedule__wash" aria-hidden="true"></div>
+
+  <!-- Faint floral watermarks -->
+  <img class="schedule__floral schedule__floral--top" src={flowersTop} alt="" aria-hidden="true" decoding="async" />
+  <img
+    class="schedule__floral schedule__floral--bottom"
+    src={flowersBottom}
+    alt=""
+    aria-hidden="true"
+    decoding="async"
+  />
 
   <div class="schedule__content">
     <p class="schedule__eyebrow" data-schedule-animate>El itinerario</p>
@@ -144,6 +157,29 @@ const MAPS_EMBED_URL = `https://maps.google.com/maps?q=${LAT},${LNG}&z=14&output
     aspect-ratio: 1;
     background: radial-gradient(closest-side, rgb(47 82 138 / 0.08), transparent 70%);
     pointer-events: none;
+  }
+
+  /* Faint floral watermarks */
+  .schedule__floral {
+    position: absolute;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .schedule__floral--top {
+    top: -6%;
+    left: -10%;
+    width: min(42vw, 380px);
+    transform: scaleX(-1) rotate(6deg);
+    opacity: 0.14;
+  }
+
+  .schedule__floral--bottom {
+    bottom: -10%;
+    right: -12%;
+    width: min(52vw, 480px);
+    rotate: -4deg;
+    opacity: 0.16;
   }
 
   .schedule__content {
