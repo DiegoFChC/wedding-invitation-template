@@ -48,7 +48,7 @@ GSAP conventions here: all motion goes through `gsap.matchMedia()` with `prefers
 ## Data & pending work
 
 - Guest data: `src/data/invitados.json` — `{ token: { name, allowedSlots } }`. Stepper max and guest greeting derive from it.
-- RSVP answers persist to `localStorage` key `rsvp_confirmado_<token>` and are logged to the console. The Google Apps Script / Google Sheets POST is **not wired yet** (next planned task).
+- RSVP flow (`rsvp.ts`): Google Sheets is the single source of truth. On load, personalized pages run `GET APPS_SCRIPT_URL?token=<token>` (Apps Script `doGet` scans the sheet's token column and returns `{ alreadyAnswered, data }`); answered guests get a summary card instead of the form; network failure falls back to showing the form (no local persistence anywhere). Submissions POST the JSON payload `{ token, name, attendance: "yes"|"no", count, message }` via opaque `no-cors` (completion = success).
 
 ## Conventions
 

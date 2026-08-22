@@ -59,7 +59,7 @@ El enlace a compartir tiene la forma:
 https://<dominio>/invitacion/k8f3x9a1
 ```
 
-Un código inexistente muestra una página 404 amigable. Cuando el invitado confirma, su respuesta se guarda en `localStorage` (`rsvp_confirmado_<token>`), así que si vuelve a entrar ve el resumen en lugar del formulario.
+Un código inexistente muestra una página 404 amigable. **Google Sheets es la única fuente de verdad**: al abrir su enlace, la página consulta si ese token ya respondió (`GET ?token=...`) y, en tal caso, muestra un resumen elegante en lugar del formulario — funciona desde cualquier dispositivo. El envío POSTea el JSON a Apps Script; no se guarda nada en el navegador.
 
 ## 🎨 Personalización rápida
 
@@ -86,6 +86,7 @@ Un código inexistente muestra una página 404 amigable. Cuando el invitado conf
 └── package.json
 ```
 
-## 🗺️ Pendientes
+## 🗺️ Notas técnicas
 
-- Conectar el formulario RSVP con **Google Sheets** vía Google Apps Script (actualmente la respuesta validada se registra en consola y localStorage).
+- El formulario envía el JSON con `fetch(..., { mode: "no-cors" })`; la respuesta es opaca por diseño (el "Content-Type: application/json" no está permitido en modo no-cors, por eso el cuerpo viaja como texto plano y Apps Script lo parsea del evento `doPost`).
+- Para cambiar el destino de las respuestas, edita la constante `APPS_SCRIPT_URL` en `src/scripts/rsvp.ts`.

@@ -2,8 +2,9 @@
  * Envelope opening choreography (GSAP).
  *
  * Flow: tap the wax seal -> flap swings open -> card slides out of the
- * pocket -> the letter expands toward the viewer while the overlay dissolves,
- * unveiling the page beneath (hero section) and unlocking scrolling.
+ * pocket -> the letter expands gently toward the viewer while the physical
+ * envelope dissolves (backdrop still opaque), then the whole overlay clears
+ * handing off mid-fade so the hero intro picks up seamlessly.
  *
  * Broadcasts "envelope:opened" so other modules can react (hero intro).
  */
@@ -56,7 +57,6 @@ export function initEnvelope(): void {
     gsap.set(hint, { autoAlpha: 0 });
     gsap.set(flap, { rotationX: 180 });
     gsap.set([back, pocket, glow, card], { autoAlpha: 0 });
-    gsap.set(scene, { autoAlpha: 0 });
     hideScene();
     releasePage();
   };
@@ -141,3 +141,4 @@ export function initEnvelope(): void {
     else playOpen();
   });
 }
+

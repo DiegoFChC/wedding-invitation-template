@@ -7,7 +7,11 @@
  * single static frame of faint dots.
  */
 
-const COLORS = ["#e6c96a", "#c9a227", "#d9b95c", "#9fb4dd"] as const;
+/** Palettes: `dark` pops on navy backgrounds, `light` reads on warm cream. */
+const PALETTES = {
+  dark: ["#e6c96a", "#c9a227", "#d9b95c", "#9fb4dd"],
+  light: ["#b8860b", "#8f6c12", "#a07c17", "#41639e"],
+} as const;
 
 interface Particle {
   x: number;
@@ -31,6 +35,10 @@ export function initParticles(): void {
   if (!ctx) return;
 
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Opt into the high-contrast set with data-theme="light" on light pages.
+  const theme = canvas.dataset.theme === "light" ? PALETTES.light : PALETTES.dark;
+  const alphaFloor = theme === PALETTES.light ? 0.38 : 0.28;
 
   let width = 0;
   let height = 0;
@@ -59,8 +67,8 @@ export function initParticles(): void {
     swaySpeed: 0.25 + Math.random() * 0.5,
     phase: Math.random() * Math.PI * 2,
     twinkleSpeed: 0.6 + Math.random() * 1.6,
-    color: COLORS[Math.floor(Math.random() * COLORS.length)],
-    baseAlpha: 0.28 + Math.random() * 0.45,
+    color: theme[Math.floor(Math.random() * theme.length)],
+    baseAlpha: alphaFloor + Math.random() * 0.45,
     isSparkle: Math.random() < 0.18, // few four-point sparkles among dots
   });
 

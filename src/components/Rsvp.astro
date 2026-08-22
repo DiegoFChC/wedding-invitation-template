@@ -36,6 +36,11 @@ const defaultAttendees = Math.min(2, maxSlots);
     </div>
 
     <div class="rsvp__panel" data-rsvp-animate>
+      <!-- Server lookup status (revealed by rsvp.ts while validating) -->
+      <p class="panel-status" data-rsvp-loading hidden>
+        Verificando respuesta previa<span class="panel-status__dots" aria-hidden="true"></span>
+      </p>
+
       <!-- Form -->
       <form class="form" data-rsvp-form data-token={token} novalidate>
         {guestName ? (
@@ -63,7 +68,7 @@ const defaultAttendees = Math.min(2, maxSlots);
         <div class="field">
           <span class="field__label">&iquest;Contar&aacute;s con nosotros?</span>
           <div class="segmented" role="group" aria-label="Asistencia" data-rsvp-attendance>
-            <button class="segmented__option" type="button" data-attendance="yes">
+            <button class="segmented__option is-active" type="button" data-attendance="yes">
               S&iacute;, all&iacute; estar&eacute;
             </button>
             <button class="segmented__option" type="button" data-attendance="no">
@@ -119,7 +124,7 @@ const defaultAttendees = Math.min(2, maxSlots);
         <p class="success__text" data-success-text></p>
       </div>
 
-      <!-- Already answered (found in localStorage) -->
+      <!-- Already answered (resolved from Google Sheets) -->
       <div class="success" data-rsvp-registered hidden>
         <svg class="success__flourish" viewBox="0 0 120 24" fill="none" aria-hidden="true">
           <path
@@ -254,11 +259,55 @@ const defaultAttendees = Math.min(2, maxSlots);
     padding: clamp(1.4rem, 4vw, 2rem);
   }
 
+  /* Server-lookup status line + dimmed form while checking */
+  .panel-status {
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    color: rgb(230 201 106 / 0.9);
+    margin-bottom: 0.9rem;
+  }
+
+  .panel-status__dots::after {
+    content: "...";
+    display: inline-block;
+    animation: status-dots 1.4s steps(4, end) infinite;
+  }
+
+  @keyframes status-dots {
+    0% {
+      content: "";
+    }
+    25% {
+      content: ".";
+    }
+    50% {
+      content: "..";
+    }
+    75%,
+    100% {
+      content: "...";
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .panel-status__dots::after {
+      animation: none;
+    }
+  }
+
   .form {
     display: flex;
     flex-direction: column;
     gap: 1.15rem;
     text-align: left;
+    transition: opacity 0.25s ease;
+  }
+
+  .form.is-checking {
+    opacity: 0.5;
+    pointer-events: none;
   }
 
   .field {

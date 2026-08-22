@@ -12,6 +12,7 @@ import WeddingInfo from "./WeddingInfo.astro";
 import Schedule from "./Schedule.astro";
 import Rsvp from "./Rsvp.astro";
 import Footer from "./Footer.astro";
+import MusicPlayer from "./MusicPlayer.astro";
 
 interface Props {
   guestName?: string;
@@ -43,6 +44,9 @@ const { guestName, allowedSlots = 10, token = "" } = Astro.props;
     <Schedule />
     <Rsvp guestName={guestName} maxSlots={allowedSlots} token={token} />
   </main>
+
+  <!-- Looping background music with a spinning corner toggle -->
+  <MusicPlayer />
 
   <Footer />
 </Layout>

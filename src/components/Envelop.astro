@@ -2,14 +2,25 @@
 /**
  * Interactive wax-sealed wedding envelope.
  *
- * Markup + visuals live here; motion lives in src/scripts/envelopeAnimation.ts
- * (hydrated below with client:load — required for scripts to run in Astro).
+ * Markup + visuals live here; motion lives in src/scripts/envelopeAnimation.ts.
  */
+import flowersRose from "../assets/flowers1.svg?url";
+import flowersSide from "../assets/flowers2.svg?url";
 ---
 
 <div class="scene" data-envelope-scene>
+  <!-- Navy backdrop (fades independently so the card can cover the page) -->
+  <div class="scene__bg" data-scene-bg aria-hidden="true"></div>
+
   <!-- Ambient golden halo behind the envelope -->
   <div class="halo gold-halo" data-halo aria-hidden="true"></div>
+
+  <!-- Rose backdrop: the envelope rests nestled in florals -->
+  <div class="scene__roses" aria-hidden="true">
+    <img class="scene__rose scene__rose--center" src={flowersRose} alt="" decoding="async" />
+    <img class="scene__rose scene__rose--left" src={flowersSide} alt="" decoding="async" />
+    <img class="scene__rose scene__rose--right" src={flowersSide} alt="" decoding="async" />
+  </div>
 
   <!-- Floating gold / warm-blue dust -->
   <canvas class="scene__particles" data-particles aria-hidden="true"></canvas>
@@ -78,7 +89,8 @@
   /* Scene ---------------------------------------------------------------- */
   /* Fixed overlay: covers the viewport while closed and leaves NO gap in
      the document flow once faded out (the page beneath becomes visible).
-     Opaque navy backdrop so the page underneath stays hidden until opened. */
+     The navy backdrop lives on .scene__bg so it can fade on its own while
+     the expanding card stays fully opaque. */
   .scene {
     position: fixed;
     inset: 0;
@@ -87,7 +99,50 @@
     place-items: center;
     overflow: hidden;
     padding: 1.5rem;
+  }
+
+  .scene__bg {
+    position: absolute;
+    inset: 0;
     background: radial-gradient(95% 75% at 50% 38%, #0d2445 0%, var(--color-navy-deep) 70%);
+  }
+
+  /* Rose backdrop ---------------------------------------------------------- */
+  .scene__roses {
+    position: absolute;
+    inset: -6%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Pale petals + screen blend = luminous watercolor over the navy */
+  .scene__rose {
+    position: absolute;
+    mix-blend-mode: screen;
+  }
+
+  .scene__rose--center {
+    left: 50%;
+    top: 50%;
+    width: min(120vw, 900px);
+    transform: translate(-50%, -50%) rotate(-8deg);
+    opacity: 0.1;
+  }
+
+  .scene__rose--left {
+    left: -14%;
+    bottom: -16%;
+    width: min(58vw, 470px);
+    transform: scaleX(-1) rotate(10deg);
+    opacity: 0.5;
+  }
+
+  .scene__rose--right {
+    right: -16%;
+    bottom: -20%;
+    width: min(62vw, 510px);
+    transform: rotate(-6deg);
+    opacity: 0.55;
   }
 
   /* Edge vignette for depth */
