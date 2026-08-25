@@ -2,14 +2,9 @@
  * Persistent background music: looping audio with a spinning vinyl-style
  * toggle pinned to the bottom-left corner.
  *
- * Autoplay strategy (mobile browsers are strict):
- *   1. Immediate MUTED attempt — allowed on most desktops.
- *   2. Every early interaction (tap/touch/click anywhere, e.g. the wax-seal)
- *      retries with sound until playback actually starts. Mobile browsers
- *      reject even muted autoplay under battery/data savers, and with
- *      preload="auto" still needing to buffer, retrying per gesture is what
- *      finally gets the song going.
- * If the guest pauses explicitly, nothing re-plays on its own.
+ * Playback starts ONLY when the guest taps the wax seal ([data-seal]).
+ * Because that tap is a genuine user gesture, `audio.play()` with sound is
+ * allowed on every device/browser (no muted-autoplay tricks needed).
  */
 
 export function initMusicPlayer(): void {
@@ -19,7 +14,6 @@ export function initMusicPlayer(): void {
   if (!root || !audio || !toggle) return;
 
   let userPaused = false;
-  let soundOn = false;
 
   const sync = () => {
     const playing = !audio.paused;
@@ -31,46 +25,30 @@ export function initMusicPlayer(): void {
     if (userPaused || !audio.paused) return;
     audio
       .play()
-      .then(() => {
-        soundOn = true;
-        sync();
-      })
+      .then(sync)
       .catch(() => {
-        /* retried on the next gesture */
+        /* extremely rare; the toggle button remains available */
       });
   };
 
-  // 1) Immediate muted attempt (desktops mostly).
-  audio.muted = true;
-  start();
-
-  // 2) Retry with sound on every early gesture until it sticks (phones).
-  const kickstart = () => {
-    if (soundOn || userPaused) return;
-    soundOn = true;
-    audio.muted = false;
-    start();
-  };
-  ["pointerdown", "touchstart", "click"].forEach((event) =>
-    document.addEventListener(event, kickstart, { passive: true }),
-  );
-
-  // Some mobile browsers suspend media in the background: resume on return.
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden && soundOn && !userPaused && audio.paused) start();
-  });
+  // The seal tap doubles as the "play" trigger.
+  const seal = document.querySelector<HTMLButtonElement>("[data-seal]");
+  seal?.addEventListener("click", start);
 
   toggle.addEventListener("click", () => {
-    if (audio.paused || audio.muted) {
+    if (audio.paused) {
       userPaused = false;
-      soundOn = true;
-      audio.muted = false;
       start();
     } else {
       userPaused = true;
       audio.pause();
       sync();
     }
+  });
+
+  // Some mobile browsers suspend media in the background: resume on return.
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && !userPaused && audio.paused) start();
   });
 
   audio.addEventListener("play", sync);

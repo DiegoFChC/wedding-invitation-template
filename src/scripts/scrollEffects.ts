@@ -91,6 +91,13 @@ export function initScrollEffects(): void {
             0.95,
           );
 
+        // Ignore gestures while the intro is playing so a swap can't collide
+        // with the entrance animation.
+        animating = true;
+        tl.eventCallback("onComplete", () => {
+          animating = false;
+        });
+
         return tl;
       };
 
@@ -220,20 +227,145 @@ export function initScrollEffects(): void {
       }
 
       /* ------------------------------------------------------------------ */
+      /* Hero story panels                                                   */
+      /*                                                                      */
+      /* The hero holds three overlapping panels (names / verse 1 / verse 2). */
+      /* Each scroll step inside the hero dissolves the current text into     */
+      /* particles drifting sideways and assembles the next one the same way. */
+      /* After the last verse, the next gesture continues to the date section.*/
+      /* ------------------------------------------------------------------ */
+      const panels = Array.from(document.querySelectorAll<HTMLElement>("[data-hero-panel]"));
+
+      /** Split [data-chunk="chars"] text into per-character spans (once). */
+      const chunkify = (panel: HTMLElement) => {
+        panel.querySelectorAll<HTMLElement>('[data-chunk="chars"]').forEach((el) => {
+          if (el.dataset.chunked) return;
+          el.dataset.chunked = "true";
+
+          const walk = (node: Node) => {
+            Array.from(node.childNodes).forEach((child) => {
+              if (child.nodeType === Node.TEXT_NODE) {
+                const frag = document.createDocumentFragment();
+                (child.textContent ?? "").split(/(\s+)/).forEach((piece) => {
+                  if (!piece) return;
+                  if (/^\s+$/.test(piece)) {
+                    frag.append(document.createTextNode(" "));
+                    return;
+                  }
+                  const word = document.createElement("span");
+                  word.style.display = "inline-block";
+                  word.style.whiteSpace = "nowrap";
+                  Array.from(piece).forEach((char) => {
+                    const span = document.createElement("span");
+                    span.dataset.chunk = "char";
+                    span.style.display = "inline-block";
+                    span.textContent = char;
+                    word.append(span);
+                  });
+                  frag.append(word);
+                });
+                child.replaceWith(frag);
+              } else if (child.nodeType === Node.ELEMENT_NODE) {
+                const el2 = child as HTMLElement;
+                if (!el2.dataset.chunk) walk(child); // keep whole-element chunks intact
+              }
+            });
+          };
+          walk(el);
+        });
+      };
+
+      /** Every scatterable unit of a panel: element chunks + char chunks. */
+      const chunksOf = (panel: HTMLElement): HTMLElement[] =>
+        Array.from(panel.querySelectorAll<HTMLElement>("[data-chunk]")).filter(
+          (el) => el.dataset.chunk !== "chars",
+        );
+
+      const rand = (min: number, max: number) => min + Math.random() * (max - min);
+
+      let heroStep = 0;
+
+      /** Show panel i instantly with its chunks at rest. */
+      const showHeroPanelInstantly = (index: number) => {
+        panels.forEach((panel, k) => {
+          gsap.set(panel, { autoAlpha: k === index ? 1 : 0 });
+          if (k === index) gsap.set(chunksOf(panel), { x: 0, y: 0, rotation: 0 });
+        });
+        heroStep = index;
+      };
+
+      /** Particle-style swap: current text scatters right/left, next assembles. */
+      const swapHeroPanel = (fromIndex: number, toIndex: number, dir: 1 | -1) => {
+        const from = panels[fromIndex];
+        const to = panels[toIndex];
+        if (!from || !to) return;
+
+        const outX = dir === 1 ? rand(160, 480) : -rand(160, 480);
+        const inX = dir === 1 ? -rand(160, 480) : rand(160, 480);
+
+        animating = true;
+        const tl = gsap.timeline({
+          onComplete: () => {
+            animating = false;
+            cooldownUntil = Date.now() + 150; // absorb gesture momentum
+          },
+        });
+
+        tl.to(chunksOf(from), {
+          x: () => outX * rand(0.5, 1),
+          y: () => rand(-56, 56),
+          rotation: () => rand(-35, 35),
+          autoAlpha: 0,
+          duration: 0.65,
+          ease: "power2.in",
+          stagger: { each: 0.004, from: "random" },
+        })
+          .set(to, { autoAlpha: 1 })
+          .fromTo(
+            chunksOf(to),
+            {
+              x: () => inX * rand(0.5, 1),
+              y: () => rand(-56, 56),
+              rotation: () => rand(-30, 30),
+              autoAlpha: 0,
+            },
+            {
+              x: 0,
+              y: 0,
+              rotation: 0,
+              autoAlpha: 1,
+              duration: 0.7,
+              ease: "power3.out",
+              stagger: { each: 0.004, from: "random" },
+            },
+            "<+=0.12",
+          );
+      };
+
+      /* ------------------------------------------------------------------ */
       /* Section navigation                                                  */
       /*                                                                      */
-      /* One gesture = one section, ONLY between the first two sections       */
-      /* (names <-> date). From section 3 onward scrolling is fully native,   */
-      /* so long sections stay freely reachable.                              */
+      /* One gesture = one step. Inside the hero that means the next story    */
+      /* panel (names -> verse -> verse); after the last verse it glides to   */
+      /* the date section. From section 3 onward scrolling is fully native.   */
+      /* Coming back up lands on the last verse and rewinds the story.       */
       /* ------------------------------------------------------------------ */
       const sections = Array.from(document.querySelectorAll<HTMLElement>("main > section"));
       if (sections.length === 0) return;
 
-      /** Last section index reachable through gesture snapping. */
+      /** Last SECTION index reachable through gesture snapping. */
       const NAV_LIMIT = 1;
       const OVERSIZE_MARGIN = 8;
       let animating = false;
       let cooldownUntil = 0;
+
+      // Prepare the story once motion is allowed.
+      if (panels.length > 1) {
+        panels.forEach(chunkify);
+        panels.forEach((panel, i) => {
+          if (i > 0) gsap.set(panel, { autoAlpha: 0 });
+        });
+      }
 
       /** Section whose vertical span currently contains the viewport top. */
       const currentIndex = () => {
@@ -259,7 +391,7 @@ export function initScrollEffects(): void {
 
       const busy = () => animating || Date.now() < cooldownUntil;
 
-      const navigate = (dir: 1 | -1) => {
+      const navigate = (dir: 1 | -1, onDone?: () => void) => {
         const current = currentIndex();
         const target = current + dir;
         if (target === current || target < 0 || target > NAV_LIMIT) return false;
@@ -272,6 +404,7 @@ export function initScrollEffects(): void {
           onComplete: () => {
             animating = false;
             cooldownUntil = Date.now() + 350; // swallow gesture momentum
+            onDone?.();
           },
         });
         return true;
@@ -281,6 +414,30 @@ export function initScrollEffects(): void {
       const onGesture = (dir: 1 | -1): boolean => {
         if (busy()) return true; // handled: keep native input suppressed
         if (currentIndex() > NAV_LIMIT) return false; // native beyond section 2
+
+        // Inside the hero: walk through the story panels first.
+        if (currentIndex() === 0 && panels.length > 1) {
+          if (dir === 1) {
+            if (heroStep < panels.length - 1) {
+              swapHeroPanel(heroStep, heroStep + 1, 1);
+              heroStep++;
+              return true;
+            }
+            return navigate(1); // story finished -> date section
+          }
+          if (heroStep > 0) {
+            swapHeroPanel(heroStep, heroStep - 1, -1);
+            heroStep--;
+            return true;
+          }
+          return false; // already at the very beginning
+        }
+
+        // Returning to the hero from the date section: land on the last verse.
+        if (currentIndex() === 1 && dir === -1 && panels.length > 1) {
+          return navigate(-1, () => showHeroPanelInstantly(panels.length - 1));
+        }
+
         if (!atLeadingEdge(dir)) return false; // free native scroll inside tall section
         return navigate(dir);
       };

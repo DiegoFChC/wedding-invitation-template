@@ -1,4 +1,4 @@
-# Stiven & Milena — Invitación de Boda 💍
+# Milena & Stiven — Invitación de Boda 💍
 
 Invitación web interactiva y privada para compartir por WhatsApp. El invitado abre un sobre sellado con animación, recorre las secciones de la boda y confirma su asistencia mediante un formulario asociado a su código personal.
 

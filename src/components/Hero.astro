@@ -10,7 +10,7 @@ import flowersMirrorSource from "../assets/flowers.svg?url";
 import flowersSoft from "../assets/flowers1.svg?url";
 ---
 
-<section id="inicio" class="hero" aria-label="Stiven y Milena — Nuestra boda">
+<section id="inicio" class="hero" aria-label="Milena y Stiven — Nuestra boda">
   <!-- Soft floral watermark, top-left -->
   <img
     class="hero__flower hero__flower--soft"
@@ -33,28 +33,54 @@ import flowersSoft from "../assets/flowers1.svg?url";
   <!-- Floating gold / warm-blue dust (light theme: readable on cream) -->
   <canvas class="hero__particles" data-particles data-theme="light" aria-hidden="true"></canvas>
 
-  <div class="hero__content">
-    <svg class="hero__flourish" data-hero-flourish viewBox="0 0 120 24" fill="none" aria-hidden="true">
-      <path
-        data-flourish-line
-        d="M4 12 C 30 2, 44 2, 60 12 C 76 22, 90 22, 116 12"
-        stroke="currentColor"
-        stroke-width="1.4"
-        stroke-linecap="round"></path>
-      <path data-flourish-gem d="M60 4.5 l4.5 7.5 -4.5 7.5 -4.5 -7.5 Z" fill="currentColor"></path>
-    </svg>
+  <!-- Story stage: three overlapping panels swapped on scroll.
+       Panel 0 = names · Panel 1 = verse 1 · Panel 2 = verse 2 -->
+  <div class="hero__stage">
+    <div class="hero__panel hero__content" data-hero-panel>
+      <svg class="hero__flourish" data-hero-flourish data-chunk="el" viewBox="0 0 120 24" fill="none" aria-hidden="true">
+        <path
+          data-flourish-line
+          d="M4 12 C 30 2, 44 2, 60 12 C 76 22, 90 22, 116 12"
+          stroke="currentColor"
+          stroke-width="1.4"
+          stroke-linecap="round"></path>
+        <path data-flourish-gem d="M60 4.5 l4.5 7.5 -4.5 7.5 -4.5 -7.5 Z" fill="currentColor"></path>
+      </svg>
 
-    <p class="hero__eyebrow" data-hero-animate>Nuestra boda</p>
+      <p class="hero__eyebrow" data-hero-animate data-chunk="el">Nuestra boda</p>
 
-    <!-- Names stack on mobile, sit side by side from sm up -->
-    <h1 class="hero__names">
-      <span class="hero__name" data-hero-name-left>Stiven</span>
-      <span class="hero__amp" data-hero-amp>&amp;</span>
-      <span class="hero__name" data-hero-name-right>Milena</span>
-    </h1>
+      <!-- Names stack on mobile, sit side by side from sm up -->
+      <h1 class="hero__names" data-chunk="chars">
+        <span class="hero__name" data-hero-name-left>Milena</span>
+        <span class="hero__amp" data-hero-amp>&amp;</span>
+        <span class="hero__name" data-hero-name-right>Stiven</span>
+      </h1>
 
-    <div class="hero__divider" data-hero-divider aria-hidden="true">
-      <span></span><i></i><span></span>
+      <div class="hero__divider" data-hero-divider data-chunk="el" aria-hidden="true">
+        <span></span><i></i><span></span>
+      </div>
+    </div>
+
+    <div class="hero__panel hero__content" data-hero-panel inert>
+      <div class="hero__ornament" data-chunk="el" aria-hidden="true">
+        <span></span><i></i><span></span>
+      </div>
+      <p class="hero__verse" data-chunk="chars">
+        &ldquo;&hellip;porque el amor no se construye con fuerzas humanas, sino con el
+        prop&oacute;sito perfecto de Dios&hellip;&rdquo;
+      </p>
+    </div>
+
+    <div class="hero__panel hero__content" data-hero-panel inert>
+      <div class="hero__ornament" data-chunk="el" aria-hidden="true">
+        <span></span><i></i><span></span>
+      </div>
+      <p class="hero__verse" data-chunk="chars">
+        &Eacute;l plant&oacute; una semilla en nuestros corazones, la cuid&oacute; y hoy nos
+        concede la bendici&oacute;n de unir nuestras vidas para siempre. <strong>Te invitamos a
+        celebrar con nosotros el inicio de este nuevo pacto.</strong>
+      </p>
+      <p class="hero__cite" data-chunk="el">Cantares 8:7</p>
     </div>
   </div>
 </section>
@@ -185,6 +211,24 @@ import flowersSoft from "../assets/flowers1.svg?url";
   }
 
   /* Content ---------------------------------------------------------------- */
+  /* Story stage: panels overlap on the same grid cell; scrollEffects swaps
+     them with a particle-style scatter (chars fly out right, next flies in). */
+  .hero__stage {
+    position: relative;
+    width: 100%;
+    display: grid;
+    place-items: center;
+  }
+
+  .hero__panel {
+    grid-area: 1 / 1;
+  }
+
+  /* Non-active panels stay out of the paint until JS reveals them */
+  .hero__panel + .hero__panel {
+    visibility: hidden;
+  }
+
   .hero__content {
     position: relative;
     z-index: 10;
@@ -194,6 +238,49 @@ import flowersSoft from "../assets/flowers1.svg?url";
     gap: clamp(0.9rem, 3vh, 1.6rem);
     padding: clamp(3rem, 10vh, 6rem) 1.5rem;
     text-align: center;
+  }
+
+  .hero__verse {
+    max-width: min(90vw, 34rem);
+    font-family: var(--font-title);
+    font-size: clamp(1.45rem, 5.6vw, 2.1rem);
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1.6;
+    color: var(--color-navy);
+  }
+
+  .hero__cite {
+    margin-top: -0.4rem;
+    font-size: clamp(0.7rem, 2.4vw, 0.85rem);
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-indent: 0.3em;
+    text-transform: uppercase;
+    color: #a07c17;
+  }
+
+  .hero__ornament {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+  }
+
+  .hero__ornament span {
+    height: 1px;
+    width: clamp(28px, 7vw, 52px);
+    background: linear-gradient(90deg, transparent, var(--color-gold));
+  }
+
+  .hero__ornament span:last-child {
+    background: linear-gradient(90deg, var(--color-gold), transparent);
+  }
+
+  .hero__ornament i {
+    width: 6px;
+    height: 6px;
+    rotate: 45deg;
+    background: var(--color-gold);
   }
 
   .hero__flourish {
