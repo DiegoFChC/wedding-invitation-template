@@ -307,7 +307,9 @@ export function initScrollEffects(): void {
         const tl = gsap.timeline({
           onComplete: () => {
             animating = false;
-            cooldownUntil = Date.now() + 150; // absorb gesture momentum
+            // Long enough that the incoming phrase is actually READ before
+            // the next gesture is accepted (no skipping through the story).
+            cooldownUntil = Date.now() + 750;
           },
         });
 
@@ -316,7 +318,7 @@ export function initScrollEffects(): void {
           y: () => rand(-56, 56),
           rotation: () => rand(-35, 35),
           autoAlpha: 0,
-          duration: 0.65,
+          duration: 0.7,
           ease: "power2.in",
           stagger: { each: 0.004, from: "random" },
         })
@@ -334,7 +336,7 @@ export function initScrollEffects(): void {
               y: 0,
               rotation: 0,
               autoAlpha: 1,
-              duration: 0.7,
+              duration: 0.8,
               ease: "power3.out",
               stagger: { each: 0.004, from: "random" },
             },
@@ -452,15 +454,29 @@ export function initScrollEffects(): void {
         { passive: false },
       );
 
-      // Touch: one decision per gesture, after a small intent threshold.
+      // Touch: the FIRST move decides. Mobile browsers ignore late
+      // preventDefault calls (once native panning has started they commit to
+      // the scroll), so ownership of the gesture is claimed as early as
+      // possible inside the gesture-driven zone — otherwise native scroll
+      // would run alongside the panel swaps.
       let touchStartY = 0;
-      let gestureClaimed = false;
+      let touchActive = false;
+      let touchOwnedByUs = false;
 
       window.addEventListener(
         "touchstart",
         (event) => {
           touchStartY = event.touches[0].clientY;
-          gestureClaimed = false;
+          touchActive = true;
+          touchOwnedByUs = false;
+        },
+        { passive: true },
+      );
+
+      window.addEventListener(
+        "touchend",
+        () => {
+          touchActive = false;
         },
         { passive: true },
       );
@@ -468,18 +484,19 @@ export function initScrollEffects(): void {
       window.addEventListener(
         "touchmove",
         (event) => {
-          if (gestureClaimed) {
+          if (!touchActive) return;
+          if (touchOwnedByUs) {
             event.preventDefault(); // we own this gesture already
             return;
           }
 
           const delta = touchStartY - event.touches[0].clientY;
-          if (Math.abs(delta) < 24) return; // not enough intent yet
+          if (Math.abs(delta) < 8) return; // tiny drift: not an intent yet
 
-          gestureClaimed = true;
           const dir: 1 | -1 = delta > 0 ? 1 : -1;
-          if (onGesture(dir)) event.preventDefault();
-          // Otherwise: leave the pan to native scrolling (inside tall sections)
+          touchOwnedByUs = onGesture(dir);
+          if (touchOwnedByUs) event.preventDefault();
+          // else: gesture belongs to native scrolling (tall sections / no-op)
         },
         { passive: false },
       );
