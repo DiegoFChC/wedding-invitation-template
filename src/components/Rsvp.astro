@@ -17,7 +17,7 @@ interface Props {
 }
 
 const { guestName, maxSlots = 10, token = "" } = Astro.props;
-const defaultAttendees = Math.min(2, maxSlots);
+const defaultAttendees = maxSlots;
 ---
 
 <section id="confirmar" class="rsvp" aria-label="Confirmación de asistencia">
