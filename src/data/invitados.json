@@ -176,7 +176,7 @@
     "allowedSlots": 2
   },
   "t0y2u4i6": {
-    "name": "Yaira",
+    "name": "Yadira y esposo",
     "allowedSlots": 2
   },
   "o8p0a2s4": {
@@ -184,11 +184,11 @@
     "allowedSlots": 1
   },
   "d6f8g0h2": {
-    "name": "Nato",
+    "name": "Bernardo Pancho",
     "allowedSlots": 3
   },
   "j5k7l9z1": {
-    "name": "Aleja",
+    "name": "Alejandra sobrina",
     "allowedSlots": 1
   },
   "x3c5v7b9": {
@@ -208,7 +208,7 @@
     "allowedSlots": 2
   },
   "a5s7d9f1": {
-    "name": "Chel",
+    "name": "Tía Aracely",
     "allowedSlots": 1
   },
   "g3h5j7k9": {
@@ -237,6 +237,14 @@
   },
   "p0o8i6u4": {
     "name": "Yuliana",
+    "allowedSlots": 1
+  },
+  "z8w0e2r4": {
+    "name": "Don Carlos y esposa",
+    "allowedSlots": 2
+  },
+  "t6y8u0i2": {
+    "name": "Doña Adriana",
     "allowedSlots": 1
   }
 }
